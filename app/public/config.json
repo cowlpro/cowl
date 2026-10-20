@@ -32,5 +32,21 @@
     "sendGasEth": "0.0000013",
     "withdrawGasEth": "0.0000004"
   },
-  "github": "https://github.com/cowlpro/cowl"
+  "github": "https://github.com/cowlpro/cowl",
+  "token": {
+    "ca": "0xdCfa97774BA2cb8a9deD0612524984f6f46d4556",
+    "curve": "0xad1d608d64830f58671e975c48fd50f415a66c22",
+    "launchBlock": 92634745,
+    "launchSupply": 1000000000,
+    "graduationEth": 4.2,
+    "creatorTaxBps": 200,
+    "launchpad": "Pons V2",
+    "dev": "0x88d62da19088a106aa76e9a2fbb2c02f00c2be2d",
+    "devBuyTx": "0x8aadf2da36731e77cbb9d903608e32130cbe1efd65f54c1ad516c68a26fe4e1c",
+    "burnTxs": [
+      "0x102bef32324e6c1cf8054af59404fc03e2dcb8dd13b489307488829f40f573b8",
+      "0x138838ce6f7b41f724e2b42b51167d0ce13c7089c1dafb8361063a0bf5cc299e"
+    ],
+    "devBurned": 19586101.93
+  }
 }

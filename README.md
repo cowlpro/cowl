@@ -73,9 +73,11 @@ app/
   src/chain.js            RPC, wallet discovery (EIP-6963), contract ABIs
   src/app.js              Receive / Send / Inbox / Withdraw
   src/landing.js, vault3d.js   landing page and the three.js vault
+  src/token.js            $COWL section: market cap chart from on-chain curve trades
   pages/                  HTML (built into app/public)
   public/                 CSS, config.json, static assets
 server/server.mjs   static server + announcement indexer (/api/announcements, /api/stats)
+                    + $COWL trades read from the Pons bonding curve (/api/token)
 test/
   stealth.test.mjs        offline unit tests for the cryptography
   e2e.mjs                 full flow on a local fork: register → send ETH + NVDA → scan → withdraw

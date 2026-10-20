@@ -34,6 +34,7 @@
   <nav class="nav-links" aria-label="Main">
     <a href="#how">How it works</a>
     <a href="#proof">Proof</a>
+    <a href="#token">Token</a>
     <a href="/transparency">Transparency</a>
     <a href="#faq">FAQ</a>
   </nav>
@@ -211,6 +212,53 @@
       <li><b>04</b><span>Open your Inbox and withdraw it. Your keys came from one signature and never left the tab.</span></li>
     </ol>
   </div>
+</section>
+
+<!-- ============================ TOKEN ============================ -->
+<section class="token" id="token">
+  <div class="sec-head"><span class="kicker">$COWL</span><h2>The token. <em>Same receipts.</em></h2>
+    <p>Every trade below is read straight from the Pons bonding curve on Robinhood Chain. No third-party feed, no rounding of the story.</p></div>
+  <div class="tk-grid">
+    <article class="pf tk-chart-card">
+      <div class="tk-top">
+        <div class="tk-mc"><span class="kicker"><span class="dot-live"></span> <span data-tk="status">Loading live data</span></span>
+          <div class="tk-big num"><span data-tk="mc">—</span> <small>market cap</small></div>
+          <div class="tk-sub mono"><span data-tk="mcEth">—</span> · price <span data-tk="price">—</span></div></div>
+        <div class="tk-range" role="group" aria-label="Chart range">
+          <button type="button" data-tk-range="1h" aria-pressed="false">1H</button><button type="button" data-tk-range="6h" aria-pressed="false">6H</button><button type="button" data-tk-range="24h" aria-pressed="false">24H</button><button type="button" data-tk-range="all" aria-pressed="true">All</button>
+        </div>
+      </div>
+      <div class="tk-canvas"><canvas id="tk-chart" aria-label="COWL market cap chart"></canvas><div id="tk-tip" class="tk-tip" hidden></div></div>
+      <div class="tk-stats">
+        <div><span class="kicker">24h volume</span><b class="num" data-tk="vol">—</b></div>
+        <div><span class="kicker">24h trades</span><b class="num" data-tk="trades24">—</b></div>
+        <div><span class="kicker">Buys / sells</span><b class="num"><span data-tk="buys">—</span> <i>/</i> <span data-tk="sells">—</span></b></div>
+      </div>
+      <div class="tk-progress">
+        <div class="tk-progress-head"><span class="kicker">Bonding curve</span><span class="mono"><b data-tk="progressPct">—</b> · <span data-tk="progressEth">—</span></span></div>
+        <div class="tk-bar" data-tk="bar"><i></i></div>
+        <p>At 4.2 ETH the curve completes and liquidity moves to Uniswap v4, where it is locked.</p>
+      </div>
+    </article>
+    <aside class="tk-side-col">
+      <article class="pf tk-facts">
+        <span class="kicker"><i class="ok-dot"></i> On-chain facts</span>
+        <div class="pf-row"><span>Contract</span><span class="tk-ca"><a class="mono" data-tk-link="token">0xdCfa…4556 ↗</a><button type="button" class="tk-copy" data-ca-copy aria-label="Copy contract address"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></button></span></div>
+        <div class="pf-row"><span>Network</span><b>Robinhood Chain</b></div>
+        <div class="pf-row"><span>Launchpad</span><b>Pons V2</b></div>
+        <div class="pf-row"><span>Supply</span><b class="num" data-tk="supply">980,413,898</b></div>
+        <div class="pf-row"><span>Dev buy</span><span class="tk-r"><b class="num"><span data-tk="devBurned">19,586,102</span> burned</b><small><a data-tk-link="devBuy">buy ↗</a> <a data-tk-link="burn1">burn 1 ↗</a> <a data-tk-link="burn2">burn 2 ↗</a></small></span></div>
+        <div class="pf-row"><span>Dev wallet holds</span><a class="good" data-tk-link="dev">0 COWL ↗</a></div>
+        <div class="pf-row"><span>Creator tax</span><b><span data-tk="tax">2%</span> buy and sell, fixed at launch</b></div>
+        <div class="tk-actions"><a class="btn small primary" data-tk-link="pons">Buy on Pons</a><a class="btn small" data-tk-link="dex">DexScreener</a></div>
+      </article>
+      <article class="pf tk-recent">
+        <span class="kicker">Latest trades</span>
+        <div class="tk-list" data-tk="recent"></div>
+      </article>
+    </aside>
+  </div>
+  <p class="tk-note">You do not need $COWL to use COWL. The app, the Router and your keys work the same with or without it. Not financial advice.</p>
 </section>
 
 <!-- ============================ HONEST ============================ -->

@@ -124,6 +124,88 @@ async function syncOnce() {
   }
 }
 
+// ---------- token $COWL: transaksi asli dari bonding curve Pons ----------
+// DexScreener baru membaca pool Uniswap setelah graduasi, jadi selama di kurva grafik dibangun dari event CurveBuy/CurveSell.
+const TOK = cfg.token || null;
+const TOK_FILE = path.join(DATA, 'token.json');
+const BUY_TOPIC = '0xec36bf571f136799e8dc0b0b8bea4b04d8bd3d43de838aab0d5fc21d4cbfc455';
+const SELL_TOPIC = '0x8113d738abdcb6b38357e9d53a54a7157861a09031b453651f0fe7fe151f59df';
+let tok = { lastBlock: TOK ? TOK.launchBlock - 50 : 0, trades: [] };
+let tokLive = { reserves: null, supply: null, trackedQuote: null, graduated: false, ethUsd: null, at: 0 };
+let tokSyncing = false;
+const big = (h) => BigInt(h);
+const toNum = (v, d = 18) => Number(v) / 10 ** d;
+async function loadTok() {
+  if (TOK && existsSync(TOK_FILE)) { try { tok = JSON.parse(await readFile(TOK_FILE, 'utf8')); } catch {} }
+}
+async function saveTok() { const tmp = TOK_FILE + '.tmp'; await writeFile(tmp, JSON.stringify(tok)); await rename(tmp, TOK_FILE); }
+const ethCall = (to, data) => rpc('eth_call', [{ to, data }, 'latest']);
+async function ethUsd() {
+  const srcs = [
+    async () => Number((await (await fetch('https://api.coinbase.com/v2/prices/ETH-USD/spot', { signal: AbortSignal.timeout(8000) })).json()).data.amount),
+    async () => Number((await (await fetch('https://api.kraken.com/0/public/Ticker?pair=ETHUSD', { signal: AbortSignal.timeout(8000) })).json()).result.XETHZUSD.c[0]),
+    async () => Number((await (await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd', { signal: AbortSignal.timeout(8000) })).json()).ethereum.usd),
+  ];
+  for (const f of srcs) { try { const v = await f(); if (v > 0) return v; } catch {} }
+  return tokLive.ethUsd;
+}
+async function syncToken() {
+  if (!TOK || tokSyncing) return;
+  tokSyncing = true;
+  try {
+    const top = head || Number(await rpc('eth_blockNumber', []));
+    while (tok.lastBlock < top) {
+      const from = tok.lastBlock + 1, to = Math.min(top, from + CHUNK - 1);
+      const logs = await rpc('eth_getLogs', [{ address: TOK.curve, topics: [[BUY_TOPIC, SELL_TOPIC]], fromBlock: '0x' + from.toString(16), toBlock: '0x' + to.toString(16) }]);
+      for (const l of logs) {
+        const d = l.data.slice(2).match(/.{64}/g).map((w) => big('0x' + w));
+        const buy = l.topics[0] === BUY_TOPIC;
+        // buy: quoteIn, tokensOut, fee, tax  ·  sell: tokensIn, quoteOut, fee, tax
+        const quote = buy ? d[0] : d[1], tokens = buy ? d[1] : d[0], fee = d[2], tax = d[3];
+        if (tokens === 0n) continue;
+        // harga bersih di kurva (tanpa fee/pajak) supaya beli & jual tidak zig-zag
+        const net = buy ? quote - fee - tax : quote + fee + tax;
+        const bn = Number(l.blockNumber);
+        tok.trades.push({ t: await blockTime(bn), b: bn, x: l.transactionHash, s: buy ? 1 : 0, w: '0x' + l.topics[1].slice(26), q: toNum(quote), k: toNum(tokens), p: Number(net) / Number(tokens) });
+      }
+      tok.lastBlock = to;
+      if (logs.length || to === top) await saveTok();
+    }
+    const [res, sup, tq, grad] = await Promise.all([
+      ethCall(TOK.curve, '0x0902f1ac'), ethCall(TOK.ca, '0x18160ddd'), ethCall(TOK.curve, '0xca52b0b7').catch(() => null), ethCall(TOK.curve, '0xe7c2b772').catch(() => null),
+    ]);
+    const r = res.slice(2).match(/.{64}/g).map((w) => big('0x' + w));
+    tokLive.reserves = [toNum(r[0]), toNum(r[1])];
+    tokLive.supply = toNum(big(sup));
+    tokLive.trackedQuote = tq && tq !== '0x' ? toNum(big(tq)) : null;
+    tokLive.graduated = grad && grad !== '0x' ? big(grad) !== 0n : false;
+    if (Date.now() - tokLive.at > 60000 || !tokLive.ethUsd) { tokLive.ethUsd = await ethUsd(); tokLive.at = Date.now(); }
+  } catch (e) {
+    console.error('token sync:', e.message || e);
+  } finally { tokSyncing = false; }
+}
+function tokenPayload() {
+  const [qr, tr] = tokLive.reserves || [0, 0];
+  const priceEth = tr ? qr / tr : null;
+  const supply = tokLive.supply;
+  const usd = tokLive.ethUsd;
+  const day = Date.now() / 1000 - 86400;
+  const d24 = tok.trades.filter((t) => t.t >= day);
+  return {
+    ca: TOK.ca, curve: TOK.curve, launchpad: TOK.launchpad, ethUsd: usd, priceEth, priceUsd: priceEth && usd ? priceEth * usd : null,
+    mcEth: priceEth && supply ? priceEth * supply : null, mcUsd: priceEth && supply && usd ? priceEth * supply * usd : null,
+    supply, launchSupply: TOK.launchSupply, burned: supply ? TOK.launchSupply - supply : null,
+    trackedQuote: tokLive.trackedQuote, graduationEth: TOK.graduationEth, graduated: tokLive.graduated,
+    progress: tokLive.trackedQuote != null ? Math.min(1, tokLive.trackedQuote / TOK.graduationEth) : null,
+    trades: tok.trades.length, buys: tok.trades.filter((t) => t.s).length, sells: tok.trades.filter((t) => !t.s).length,
+    vol24Eth: d24.reduce((a, t) => a + t.q, 0), trades24: d24.length,
+    // seri harga ringkas: [waktu, harga ETH, sisi, ETH]
+    series: tok.trades.map((t) => [t.t, t.p, t.s, +t.q.toFixed(6)]),
+    recent: tok.trades.slice(-10).reverse().map((t) => ({ t: t.t, s: t.s, q: t.q, k: t.k, w: t.w, x: t.x })),
+    indexed: tok.lastBlock, updated: Math.floor(Date.now() / 1000),
+  };
+}
+
 // ---------- HTTP ----------
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
@@ -191,6 +273,7 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/config.json' && process.env.COWL_CONFIG) {
       return send(res, 200, readFileSync(CFG_FILE), { 'content-type': TYPES['.json'], 'cache-control': 'no-store' });
     }
+    if (url.pathname === '/api/token') return TOK ? json(res, tokenPayload()) : json(res, { error: 'no token' }, 404);
     if (url.pathname === '/api/health') return json(res, { ok: !lastError, head, indexed: db.lastBlock, error: lastError });
     if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed');
     await serveStatic(req, res, url.pathname);
@@ -200,6 +283,9 @@ const server = http.createServer(async (req, res) => {
 });
 
 await loadDb();
+await loadTok();
 server.listen(PORT, HOST, () => console.log(`COWL di http://${HOST}:${PORT} · indeks dari blok ${db.lastBlock + 1}`));
 syncOnce();
 setInterval(syncOnce, 4000);
+syncToken();
+setInterval(syncToken, 15000);

@@ -1,6 +1,7 @@
 // Landing COWL: CA/hitung mundur, angka live, cerita 4 babak yang digerakkan gulir, momen HOLD, kanvas alamat sekali pakai.
 import STOCKS from './stocks.json';
 import { createVault } from './vault3d.js';
+import { initToken } from './token.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -221,7 +222,7 @@ function bindCopy() {
   }));
 }
 function revealOnScroll() {
-  const els = $$('.sec-head, .how-grid article, .pf, .verify-self, .ledger-col, .contracts, .faq-list, .final h2, .final p, .assets');
+  const els = $$('.sec-head, .how-grid article, .pf, .verify-self, .tk-note, .ledger-col, .contracts, .faq-list, .final h2, .final p, .assets');
   els.forEach((e) => e.classList.add('rv'));
   if (reduced || !('IntersectionObserver' in window)) { els.forEach((e) => e.classList.add('in')); return; }
   const io = new IntersectionObserver((ents) => ents.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }), { rootMargin: '0px 0px -10% 0px' });
@@ -288,6 +289,7 @@ async function main() {
   } catch {}
   applyLive();
   fillContracts();
+  initToken(CFG);
   bindCopy();
   renderAssets();
   initScene();

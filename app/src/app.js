@@ -207,7 +207,7 @@ const unlockCard = (title) => `
   </div>`;
 
 function viewReceive() {
-  if (!S.account) return connectCard('Receive', 'Get paid without showing your wallet.');
+  if (!S.account) return connectCard('Receive', 'Get paid without your wallet on-chain.');
   if (!S.keys) return unlockCard('Receive');
   const link = receiveLink();
   const reg = S.keyMismatch
@@ -232,7 +232,7 @@ function viewReceive() {
     <div class="row"><span class="k">Short link (ERC-6538 registry)</span><span class="v">${reg}</span></div>
     ${S.keyMismatch ? `<p class="note warn">This wallet registered different keys earlier, so senders using your address would pay keys you cannot open here. Re-register to point your address at the keys you just unlocked.</p>` : ''}
     ${!S.registered || S.keyMismatch ? `<button class="btn block" data-act="register">${S.keyMismatch ? 'Re-register these keys' : 'Register short link · one transaction'}</button>
-      <p class="note">Publishes your public receive keys so anyone can pay <span class="mono">${short(S.account)}</span> privately. Incoming payments stay unlinkable.</p>` : ''}
+      <p class="note">Publishes your public receive keys so anyone can pay <span class="mono">${short(S.account)}</span> privately. Incoming payments stay unlinkable on-chain, but the short link itself shows your wallet address to whoever you give it to. Share the long link if that matters.</p>` : ''}
     <details class="meta"><summary>Stealth meta-address</summary><div class="meta-text">${esc(S.keys.metaAddress)}</div></details>
   </div>
   ${requestCard()}
@@ -275,7 +275,7 @@ function badgeCard() {
   <div class="card">
     <span class="kicker">Pay me privately button</span>
     <h2 class="h2">Put it on your site or profile.</h2>
-    <p class="lead">Anyone who clicks it pays your link. Your wallet stays out of every payment.</p>
+    <p class="lead">Anyone who clicks it pays a one-time address. Your wallet never appears in the payment on-chain.</p>
     <div class="badge-preview ${S.badge}"><a href="${esc(receiveLink())}" target="_blank" rel="noopener"><img src="/assets/badge-${S.badge}.svg" alt="Pay me privately with COWL" width="232" height="48"></a></div>
     <div class="seg" role="group" aria-label="Button style">
       <button type="button" data-act="badge-style" data-style="dark" aria-pressed="${S.badge === 'dark'}">Dark</button>

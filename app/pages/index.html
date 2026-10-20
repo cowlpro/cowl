@@ -90,8 +90,8 @@
   </aside>
 
   <div class="hero-stats" id="stats">
-    <div><span class="kicker">Stealth payments on chain</span><b class="num" data-stat="announcements">—</b></div>
-    <div><span class="kicker">Sent through COWL</span><b class="num" data-stat="viaCowl">—</b></div>
+    <div><span class="kicker">Payments via COWL Router</span><b class="num" data-stat="viaCowl">—</b></div>
+    <div><span class="kicker">ERC-5564 payments · all apps</span><b class="num" data-stat="announcements">—</b></div>
     <div><span class="kicker">Funds held by COWL</span><b class="num">0</b></div>
     <div><span class="kicker">COWL fee</span><b class="num">0%</b></div>
     <div><span class="kicker">Latest block</span><b class="num mono" data-stat="head">—</b></div>
@@ -148,7 +148,7 @@
       <span class="how-n mono">02</span>
       <h3>Share your link</h3>
       <p>Post it in your bio, send it to a client, print it as a QR. Anyone with ETH or a stock token on Robinhood Chain can pay it.</p>
-      <div class="mini"><div class="mini-link mono">cowl.pro/pay/0x9A3f…e21C</div><div class="mini-row"><span>Senders see your wallet</span><b class="ok">No</b></div></div>
+      <div class="mini"><div class="mini-link mono">cowl.pro/pay/0x9A3f…e21C</div><div class="mini-row"><span>Your wallet in the payment</span><b class="ok">Not on-chain</b></div></div>
     </article>
     <article>
       <span class="how-n mono">03</span>
@@ -168,7 +168,7 @@
     <article class="tool">
       <span class="kicker">New · Pay me privately button</span>
       <h3>Put it on your site or profile.</h3>
-      <p>One line of HTML for your website, Markdown for GitHub, a short line for your bio. Anyone who clicks it pays your link, never your wallet.</p>
+      <p>One line of HTML for your website, Markdown for GitHub, a short line for your bio. Anyone who clicks it pays a one-time address, not your wallet.</p>
       <div class="tool-badges"><img src="/assets/badge-dark.svg" alt="Pay me privately with COWL, dark" width="232" height="48" loading="lazy"><img src="/assets/badge-light.svg" alt="Pay me privately with COWL, light" width="232" height="48" loading="lazy"></div>
       <a class="btn small" href="/receive">Get your button <span class="arrow">→</span></a>
     </article>
@@ -215,8 +215,8 @@
       <p>COWL is a thin layer over two Ethereum standards whose contracts were already live on Robinhood Chain before COWL existed.</p>
       <div class="pf-row"><span><a href="https://eips.ethereum.org/EIPS/eip-5564" target="_blank" rel="noopener">ERC-5564</a> Announcer</span><a class="mono" data-proof="announcer" target="_blank" rel="noopener">0x5564…5564 ↗</a></div>
       <div class="pf-row"><span><a href="https://eips.ethereum.org/EIPS/eip-6538" target="_blank" rel="noopener">ERC-6538</a> Registry</span><a class="mono" data-proof="registry" target="_blank" rel="noopener">0x6538…6538 ↗</a></div>
-      <div class="pf-row"><span>Stealth payments on chain</span><b class="num" data-stat="announcements">—</b></div>
-      <div class="pf-row"><span>Sent through COWL</span><b class="num" data-stat="viaCowl">—</b></div>
+      <div class="pf-row"><span>Payments through the COWL Router</span><b class="num" data-stat="viaCowl">—</b></div>
+      <div class="pf-row"><span>ERC-5564 payments on the chain, every app <a href="/transparency">why both</a></span><b class="num" data-stat="announcements">—</b></div>
     </article>
   </div>
   <div class="verify-self">
@@ -290,6 +290,7 @@
     <div class="ledger-col public"><span class="kicker">Still public</span>
       <div class="ledger-row"><b>Amount and asset</b><span>Visible on Blockscout like any transfer.</span></div>
       <div class="ledger-row"><b>The sender's wallet</b><span>The payer is not hidden.</span></div>
+      <div class="ledger-row"><b>Your short link</b><span>The 0x short link names your wallet to whoever you share it with. The long link does not.</span></div>
       <div class="ledger-row"><b>Where you withdraw to</b><span>Withdraw to your main wallet and the link is back.</span></div>
     </div>
   </div>

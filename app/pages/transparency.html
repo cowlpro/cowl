@@ -59,9 +59,13 @@
       <tr><td>Amount and asset</td><td class="pub">Public</td><td>Transfers on Robinhood Chain are public. COWL does not encrypt amounts.</td></tr>
       <tr><td>Sender's wallet</td><td class="pub">Public</td><td>The payer signs a normal transaction from their own wallet.</td></tr>
       <tr><td>Withdrawal destination</td><td class="pub">Public</td><td>Withdrawing to your main wallet links that payment to it. Withdraw to a fresh wallet to stay hidden.</td></tr>
+      <tr><td>Short link (0x…)</td><td class="pub">Names your wallet</td><td>The short link is your wallet address. Whoever you share it with knows the payment is for that wallet. The chain still does not link the payment to it. Share the long link to avoid this.</td></tr>
       <tr><td>Registered receive keys</td><td class="pub">Public</td><td>Registering a short link publishes your public keys next to your address. Incoming payments are still unlinkable.</td></tr>
     </tbody>
   </table>
+
+  <h2>Usage numbers on cowl.pro</h2>
+  <p>The site shows two counters, and they measure different things. <b>Payments via COWL Router</b> counts only payments sent through the COWL Router. <b>ERC-5564 payments · all apps</b> counts every stealth payment announced on Robinhood Chain by any app, because the Announcer is a shared standard contract. COWL is new; most of the second number is not COWL.</p>
 
   <h2>Contracts</h2>
   <table>

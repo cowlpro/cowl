@@ -421,3 +421,16 @@ em { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-w
   .tk-stats .kicker { white-space: nowrap; font-size: 10px; letter-spacing: .1em; }
   .tk-stats > div + div { padding-left: 12px; }
 }
+
+/* ---------- alat baru: link tagihan + tombol Pay me privately ---------- */
+.tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.tool { border: 1px solid var(--line); border-radius: 22px; padding: 28px; background: linear-gradient(180deg, #0c0c0d, #070708); display: grid; align-content: start; gap: 12px; }
+.tool .kicker { color: #8fb3ff; }
+.tool h3 { font-size: 24px; font-weight: 600; letter-spacing: -.02em; margin: 0; }
+.tool p { color: var(--ink-2); margin: 0 0 4px; font-size: 15px; }
+.tool .btn { justify-self: start; margin-top: 6px; }
+.tool-badges { display: flex; flex-wrap: wrap; gap: 12px; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: #050506; }
+.tool-badges img { max-width: 100%; height: auto; }
+@media (max-width: 960px) {
+  .tools-grid { grid-template-columns: 1fr; }
+}

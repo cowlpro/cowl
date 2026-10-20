@@ -177,3 +177,19 @@ details.meta[open] summary::after { content: ' −'; }
   .inbox-item .btn { grid-column: 1 / -1; width: 100%; }
   .app-foot { padding: 16px; }
 }
+
+/* ---------- link tagihan + tombol Pay me privately ---------- */
+.card .h2 { font-size: 24px; font-weight: 500; letter-spacing: -.02em; line-height: 1.15; margin: 10px 0 8px; }
+.req-banner { display: grid; gap: 6px; padding: 16px 18px; margin: 4px 0 20px; border: 1px solid #4a8dff44; background: #4a8dff0d; border-radius: 14px; }
+.req-banner b { font-size: 16px; font-weight: 500; color: var(--ink); overflow-wrap: anywhere; }
+.req-banner .mono { font-size: 13px; color: var(--ink-2); }
+.req-banner small { font-size: 12px; color: var(--muted); }
+.badge-preview { display: grid; place-items: center; padding: 28px 16px; border-radius: 14px; border: 1px solid var(--line); background: #070708; margin: 6px 0 12px; }
+.badge-preview.light { background: #f2f3f5; border-color: #f2f3f5; }
+.badge-preview img { display: block; max-width: 100%; height: auto; }
+.seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 999px; padding: 3px; background: #0a0a0b; margin-bottom: 14px; }
+.seg button { font-size: 12.5px; color: var(--muted); padding: 6px 14px; border-radius: 999px; }
+.seg button[aria-pressed='true'] { background: #1c1c20; color: var(--ink); }
+.snip { border: 1px solid var(--line); border-radius: 12px; background: #050506; margin-top: 10px; overflow: hidden; }
+.snip-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 8px 8px 14px; border-bottom: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+.snip-code { margin: 0; padding: 12px 14px; font-family: var(--mono); font-size: 12px; line-height: 1.55; color: var(--ink-2); white-space: pre-wrap; word-break: break-all; }

@@ -12,6 +12,7 @@ import {
 const $ = (s, r = document) => r.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const ZERO_META = '0x';
+const MEMO_MAX = 80; // catatan tagihan hanya hidup di link, tidak pernah ditulis ke chain
 
 const S = {
   view: 'receive',
@@ -20,7 +21,9 @@ const S = {
   keys: null,
   registered: null, // meta bytes di registry ('' = belum)
   keyMismatch: false,
-  send: { to: '', meta: null, resolved: '', asset: ETH, amount: '', busy: false, step: 0, result: null },
+  send: { to: '', meta: null, resolved: '', asset: ETH, amount: '', busy: false, step: 0, result: null, req: null },
+  request: { amount: '', asset: ETH, memo: '' }, // pembuat link tagihan di Receive
+  badge: 'dark',
   inbox: { since: 0, scanned: 0, mine: new Map(), syncing: false, total: 0, err: '' },
 };
 
@@ -28,13 +31,25 @@ const S = {
 function routeFromPath() {
   const p = location.pathname;
   const m = p.match(/^\/pay\/([^/]+)/);
-  if (m) { S.view = 'send'; S.send.to = decodeURIComponent(m[1]); return; }
+  if (m) {
+    S.view = 'send'; S.send.to = decodeURIComponent(m[1]);
+    const q = new URLSearchParams(location.search);
+    const amount = (q.get('amount') || '').replace(',', '.');
+    const memo = (q.get('memo') || '').slice(0, MEMO_MAX);
+    const asset = (q.get('asset') || '').trim();
+    if (amount || memo || asset) {
+      S.send.req = { amount: /^\d*\.?\d+$/.test(amount) ? amount : '', memo, asset };
+      if (S.send.req.amount) S.send.amount = S.send.req.amount;
+    }
+    return;
+  }
   if (p.startsWith('/send')) S.view = 'send';
   else if (p.startsWith('/inbox')) S.view = 'inbox';
   else S.view = 'receive';
 }
 function go(view, push = true) {
   S.view = view;
+  S.send.req = null; // tagihan hanya berlaku untuk link yang dibuka, bukan tab yang diklik
   if (push) history.pushState({}, '', '/' + view);
   render();
 }
@@ -122,6 +137,39 @@ function receiveLink() {
   return `${location.origin}/pay/${tail}`;
 }
 
+// link tagihan: link penerima + jumlah/aset/catatan sebagai parameter URL
+function assetParam(a) {
+  if (a.address === 'eth') return 'ETH';
+  if (STOCKS.some((x) => x.address.toLowerCase() === a.address.toLowerCase()) || a.symbol === 'COWL') return a.symbol;
+  return a.address;
+}
+function requestLink() {
+  const r = S.request;
+  const q = new URLSearchParams();
+  if (r.amount) q.set('amount', r.amount);
+  if (r.amount || r.asset.address !== 'eth') q.set('asset', assetParam(r.asset));
+  if (r.memo.trim()) q.set('memo', r.memo.trim().slice(0, MEMO_MAX));
+  const qs = q.toString();
+  return receiveLink() + (qs ? '?' + qs : '');
+}
+// aset dari link tagihan: ETH, simbol (COWL / saham), atau alamat 0x
+async function resolveAssetParam(v) {
+  if (!v || v.toUpperCase() === 'ETH') return ETH;
+  const hit = assetList().find((a) => a.symbol.toLowerCase() === v.toLowerCase() || (a.address !== 'eth' && a.address.toLowerCase() === v.toLowerCase()));
+  if (hit) return hit;
+  if (ethers.isAddress(v)) return tokenInfo(v);
+  throw new Error('Unknown asset in this request');
+}
+function badgeUrl() { return `${location.origin}/assets/badge-${S.badge}.svg`; }
+function badgeSnippets() {
+  const link = receiveLink();
+  return {
+    html: `<a href="${link}" target="_blank" rel="noopener"><img src="${badgeUrl()}" alt="Pay me privately with COWL" width="232" height="48"></a>`,
+    md: `[![Pay me privately with COWL](${badgeUrl()})](${link})`,
+    bio: `Pay me privately: ${link.replace(/^https?:\/\//, '')}`,
+  };
+}
+
 // ===================================================================== tampilan
 function render() {
   document.querySelectorAll('.tabs a').forEach((a) => a.classList.toggle('on', a.dataset.view === S.view));
@@ -186,6 +234,57 @@ function viewReceive() {
     ${!S.registered || S.keyMismatch ? `<button class="btn block" data-act="register">${S.keyMismatch ? 'Re-register these keys' : 'Register short link · one transaction'}</button>
       <p class="note">Publishes your public receive keys so anyone can pay <span class="mono">${short(S.account)}</span> privately. Incoming payments stay unlinkable.</p>` : ''}
     <details class="meta"><summary>Stealth meta-address</summary><div class="meta-text">${esc(S.keys.metaAddress)}</div></details>
+  </div>
+  ${requestCard()}
+  ${badgeCard()}`;
+}
+
+function requestCard() {
+  const r = S.request;
+  return `
+  <div class="card" id="req-card">
+    <span class="kicker">Payment request</span>
+    <h2 class="h2">Ask for an exact amount.</h2>
+    <p class="lead">Set the amount, the asset and a note. The payer opens the link and everything is filled in.</p>
+    <div class="field">
+      <div class="lab"><span>Amount</span><span>optional</span></div>
+      <div class="amount-wrap">
+        <input class="input" id="req-amount" inputmode="decimal" placeholder="0.00" value="${esc(r.amount)}">
+        <button type="button" class="asset-btn" data-act="req-asset">${assetIcon(r.asset)}<span>${esc(r.asset.symbol)}</span><span aria-hidden="true">▾</span></button>
+      </div>
+    </div>
+    <div class="field">
+      <div class="lab"><label for="req-memo">Note</label><span id="req-count">${r.memo.length}/${MEMO_MAX}</span></div>
+      <input class="input" id="req-memo" maxlength="${MEMO_MAX}" placeholder="Invoice #12 · design work" value="${esc(r.memo)}">
+    </div>
+    <div class="link-box"><span class="url" id="req-url">${esc(requestLink().replace(/^https?:\/\//, ''))}</span>
+      <button class="btn small primary" data-act="copy-req">Copy</button></div>
+    <div class="link-actions">
+      <button class="btn small" data-act="req-qr">QR code</button>
+      ${navigator.share ? '<button class="btn small" data-act="share-req">Share</button>' : ''}
+    </div>
+    <div class="qr" id="req-qr"></div>
+    <p class="note">The note lives only in the link. It is never written on-chain. Amounts are public once paid, like any transfer.</p>
+  </div>`;
+}
+
+function badgeCard() {
+  const sn = badgeSnippets();
+  const longLink = !S.registered || S.keyMismatch;
+  return `
+  <div class="card">
+    <span class="kicker">Pay me privately button</span>
+    <h2 class="h2">Put it on your site or profile.</h2>
+    <p class="lead">Anyone who clicks it pays your link. Your wallet stays out of every payment.</p>
+    <div class="badge-preview ${S.badge}"><a href="${esc(receiveLink())}" target="_blank" rel="noopener"><img src="/assets/badge-${S.badge}.svg" alt="Pay me privately with COWL" width="232" height="48"></a></div>
+    <div class="seg" role="group" aria-label="Button style">
+      <button type="button" data-act="badge-style" data-style="dark" aria-pressed="${S.badge === 'dark'}">Dark</button>
+      <button type="button" data-act="badge-style" data-style="light" aria-pressed="${S.badge === 'light'}">Light</button>
+    </div>
+    ${[['html', 'Website (HTML)'], ['md', 'GitHub / Markdown'], ['bio', 'X or Telegram bio']].map(([k, label]) => `
+    <div class="snip"><div class="snip-head"><span>${label}</span><button type="button" class="btn small" data-act="copy-snip" data-k="${k}">Copy</button></div>
+      <pre class="snip-code">${esc(sn[k])}</pre></div>`).join('')}
+    ${longLink ? '<p class="note warn">Your link is long until you register the short link above. Register first for a bio-friendly link.</p>' : ''}
   </div>`;
 }
 
@@ -218,6 +317,10 @@ function viewSend() {
     <span class="kicker">Send privately</span>
     <h1>Pay a link, <span class="dim">not a wallet.</span></h1>
     <p class="lead">Paste a COWL link or the recipient's wallet address. A fresh one-time address is made for this payment only.</p>
+    ${s.req ? `<div class="req-banner"><span class="kicker">Payment request</span>
+      ${s.req.memo ? `<b>${esc(s.req.memo)}</b>` : ''}
+      ${s.req.amount ? `<span class="mono">Requested ${esc(s.req.amount)} ${esc(s.asset.symbol)}</span>` : ''}
+      <small>The note comes from the link you opened. It is not written on-chain.</small></div>` : ''}
     <form id="send-form" autocomplete="off">
       <div class="field">
         <label for="to">Recipient</label>
@@ -287,6 +390,7 @@ function bindPane() {
   pane.querySelectorAll('[data-act]').forEach((el) => el.addEventListener('click', onAct));
   pane.querySelectorAll('[data-nav]').forEach((el) => el.addEventListener('click', (e) => { e.preventDefault(); go(el.dataset.nav); }));
   if (S.view === 'send' && !S.send.result) bindSend();
+  if (S.view === 'receive' && $('#req-card')) bindRequest();
   if (S.view === 'inbox' && S.keys) syncInbox();
 }
 
@@ -298,9 +402,15 @@ async function onAct(e) {
     if (act === 'unlock') { btn.disabled = true; btn.textContent = 'Check your wallet…'; await unlock(); return; }
     if (act === 'copy-link') return copy(receiveLink(), 'Link copied');
     if (act === 'share') return navigator.share({ title: 'Pay me privately with COWL', url: receiveLink() }).catch(() => {});
-    if (act === 'qr') return toggleQr();
+    if (act === 'qr') return toggleQr('#qr', receiveLink());
     if (act === 'register') { btn.disabled = true; btn.textContent = 'Confirm in wallet…'; await register(); return; }
     if (act === 'asset') return openAssetModal();
+    if (act === 'req-asset') return openAssetModal((a) => { S.request.asset = a; render(); });
+    if (act === 'copy-req') return copy(requestLink(), 'Request link copied');
+    if (act === 'share-req') return navigator.share({ title: 'Payment request · COWL', url: requestLink() }).catch(() => {});
+    if (act === 'req-qr') return toggleQr('#req-qr', requestLink());
+    if (act === 'badge-style') { S.badge = btn.dataset.style; return render(); }
+    if (act === 'copy-snip') return copy(badgeSnippets()[btn.dataset.k], 'Copied');
     if (act === 'send-again') { S.send = { ...S.send, amount: '', result: null, step: 0 }; return render(); }
     if (act === 'withdraw') return openWithdraw(btn.dataset.addr);
   } catch (err) {
@@ -309,14 +419,24 @@ async function onAct(e) {
   }
 }
 
-function toggleQr() {
-  const box = $('#qr');
-  if (box.classList.toggle('show') && !box.innerHTML) {
+function toggleQr(sel, data) {
+  const box = $(sel);
+  if (box.classList.toggle('show')) {
     const q = qrcode(0, 'M');
-    q.addData(receiveLink());
+    q.addData(data);
     q.make();
     box.innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
   }
+}
+
+function bindRequest() {
+  const upd = () => {
+    $('#req-url').textContent = requestLink().replace(/^https?:\/\//, '');
+    $('#req-count').textContent = `${S.request.memo.length}/${MEMO_MAX}`;
+    const qr = $('#req-qr'); if (qr.classList.contains('show')) { qr.classList.remove('show'); toggleQr('#req-qr', requestLink()); }
+  };
+  $('#req-amount').addEventListener('input', (e) => { const v = e.target.value.replace(',', '.'); S.request.amount = /^\d*\.?\d*$/.test(v) ? v : S.request.amount; upd(); });
+  $('#req-memo').addEventListener('input', (e) => { S.request.memo = e.target.value.slice(0, MEMO_MAX); upd(); });
 }
 
 // ---------- kirim ----------
@@ -381,7 +501,7 @@ function assetList() {
   if (LIVE.ca) list.push({ symbol: 'COWL', name: 'COWL', address: ethers.getAddress(LIVE.ca), decimals: 18 });
   return list.concat(STOCKS);
 }
-function openAssetModal() {
+function openAssetModal(onPick) {
   const list = assetList();
   modal(`
     <h3>Choose an asset</h3>
@@ -396,9 +516,12 @@ function openAssetModal() {
     $('#asset-list').innerHTML = html || '<div class="empty">No match.</div>';
     $('#asset-list').querySelectorAll('.asset-item').forEach((b) => b.addEventListener('click', async () => {
       try {
-        S.send.asset = b.dataset.addr === 'eth' ? ETH : await tokenInfo(b.dataset.addr);
+        const a = b.dataset.addr === 'eth' ? ETH : await tokenInfo(b.dataset.addr);
+        closeModal();
+        if (onPick) return onPick(a);
+        S.send.asset = a;
         S.send.step = 0;
-        closeModal(); render();
+        render();
       } catch (e) { toast(niceError(e)); }
     }));
   };
@@ -595,6 +718,10 @@ async function main() {
   discoverWallets();
   await loadConfig();
   routeFromPath();
+  // link tagihan: pilih aset yang diminta (ETH, simbol, atau alamat token)
+  if (S.send.req?.asset) {
+    try { S.send.asset = await resolveAssetParam(S.send.req.asset); } catch (e) { toast(niceError(e)); }
+  }
   // tautan sosial + CA dari satu sumber
   document.querySelectorAll('[data-social]').forEach((a) => { a.href = CFG[a.dataset.social]; });
   if (LIVE.ca) {

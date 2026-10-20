@@ -222,7 +222,7 @@ function bindCopy() {
   }));
 }
 function revealOnScroll() {
-  const els = $$('.sec-head, .how-grid article, .pf, .verify-self, .tk-note, .ledger-col, .contracts, .faq-list, .final h2, .final p, .assets');
+  const els = $$('.sec-head, .how-grid article, .tools-grid article, .pf, .verify-self, .tk-note, .ledger-col, .contracts, .faq-list, .final h2, .final p, .assets');
   els.forEach((e) => e.classList.add('rv'));
   if (reduced || !('IntersectionObserver' in window)) { els.forEach((e) => e.classList.add('in')); return; }
   const io = new IntersectionObserver((ents) => ents.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }), { rootMargin: '0px 0px -10% 0px' });

@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>COWL · Put a hood on your wallet</title>
+<meta name="description" content="COWL gives you a private receive link on Robinhood Chain. Every payment lands in a fresh address only you can open. No pool, no custody, no mixer. ERC-5564 stealth addresses.">
+<meta name="theme-color" content="#000000">
+<link rel="canonical" href="https://cowl.pro/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://cowl.pro/">
+<meta property="og:title" content="COWL · Put a hood on your wallet">
+<meta property="og:description" content="Private receive links on Robinhood Chain. Every payment lands in a fresh address only you can open.">
+<meta property="og:image" content="https://cowl.pro/assets/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@cowlhq">
+<meta name="twitter:title" content="COWL · Put a hood on your wallet">
+<meta name="twitter:description" content="Private receive links on Robinhood Chain. No pool, no custody, no mixer.">
+<meta name="twitter:image" content="https://cowl.pro/assets/og.jpg">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap"></noscript>
+<link rel="stylesheet" href="/styles.css?v=__V__">
+<link rel="stylesheet" href="/landing.css?v=__V__">
+<script src="/assets/landing.js?v=__V__" type="module"></script>
+</head>
+<body class="landing">
+<canvas id="scene" class="scene" aria-hidden="true"></canvas>
+
+<header class="nav" id="nav">
+  <a class="brand" href="/" aria-label="COWL home"><img src="/assets/cowl-mark.svg" width="30" height="30" alt=""><span class="word">COWL</span></a>
+  <nav class="nav-links" aria-label="Main">
+    <a href="#how">How it works</a>
+    <a href="#proof">Proof</a>
+    <a href="/transparency">Transparency</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+  <div class="nav-right">
+    <div class="ca-chip" data-ca-chip><span class="lbl" data-ca-label>LAUNCH</span><span class="mono" data-ca-short>19 Oct · 13:00 UTC</span><button type="button" data-ca-copy hidden aria-label="Copy contract address"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></button></div>
+    <a class="icon-btn" data-social="x" href="https://x.com/cowlhq" target="_blank" rel="noopener" aria-label="COWL on X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.8 3h3.1l-6.8 7.8 8 10.2h-6.3l-4.9-6.4L5.3 21H2.2l7.3-8.3L1.8 3h6.4l4.4 5.9L17.8 3Zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5Z"/></svg></a>
+    <a class="icon-btn" data-social="telegram" href="https://t.me/cowlhq" target="_blank" rel="noopener" aria-label="COWL on Telegram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.4 4.6 18.3 19c-.2 1-.8 1.3-1.7.8l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.8 8.8-7.9c.4-.3-.1-.5-.6-.2L6.2 13 1.5 11.6c-1-.3-1-1 .2-1.5L20 3.2c.9-.3 1.6.2 1.4 1.4Z"/></svg></a>
+    <a class="btn small primary" href="/receive">Open app</a>
+  </div>
+</header>
+
+<main>
+<!-- ============================ HERO ============================ -->
+<section class="hero" id="top">
+  <div class="hero-kicker"><span>Private receive links · Robinhood Chain</span><span class="mono">ERC-5564 / 4663</span></div>
+  <div class="wordmark" aria-hidden="true">COWL</div>
+  <div class="hero-figure" aria-hidden="true"><img src="/assets/hood-sm.webp?v=__V__" alt=""></div>
+  <div class="hero-hint" aria-hidden="true"><span>Move to turn the vault</span></div>
+  <div class="vtext left" aria-hidden="true">Put a hood on your wallet</div>
+  <div class="vtext right" aria-hidden="true">Chain 4663 · Non-custodial</div>
+
+  <div class="hero-copy">
+    <span class="kicker"><span class="dot-live"></span> Live on Robinhood Chain</span>
+    <h1>Your wallet is a public statement. <em>Put a hood on it.</em></h1>
+    <p>COWL gives you a private receive link. Every payment lands in a fresh address that only you can open. No pool, no custody, no mixer.</p>
+    <div class="hero-actions">
+      <a class="btn primary" href="/receive">Create your link <span class="arrow">→</span></a>
+      <a class="btn" href="#how">How it works</a>
+    </div>
+    <div class="hero-proof">
+      <a data-proof="router" target="_blank" rel="noopener"><i class="ok-dot"></i>Source verified</a>
+      <a href="#proof"><i class="ok-dot"></i>Tested on mainnet</a>
+      <span><i class="ok-dot"></i>Holds 0 ETH</span>
+      <span><i class="ok-dot"></i>0% fee</span>
+    </div>
+  </div>
+
+  <aside class="contract-card" aria-label="COWL token">
+    <div class="cc-top"><span class="cc-tick">$COWL</span><span class="cc-status" data-cc-status><span class="dot-live"></span> <span data-cc-status-text>Launch 19 Oct · 13:00 UTC</span></span></div>
+    <div class="cc-count mono" data-countdown>--:--:--</div>
+    <div class="cc-ca">
+      <span class="kicker">Contract address</span>
+      <div class="cc-ca-row"><code class="mono" data-ca-full>Appears here at launch</code><button type="button" class="icon-btn" data-ca-copy hidden aria-label="Copy contract address"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></button></div>
+      <p class="cc-verify">Verify this address before you buy. We only post it here and on <a href="https://x.com/cowlhq" target="_blank" rel="noopener">@cowlhq</a>.</p>
+    </div>
+    <div class="cc-actions">
+      <a class="btn small primary" data-buy aria-disabled="true">Buy on Pons</a>
+      <a class="btn small" data-contract aria-disabled="true">View contract</a>
+    </div>
+  </aside>
+
+  <div class="hero-stats" id="stats">
+    <div><span class="kicker">Stealth payments on chain</span><b class="num" data-stat="announcements">—</b></div>
+    <div><span class="kicker">Sent through COWL</span><b class="num" data-stat="viaCowl">—</b></div>
+    <div><span class="kicker">Funds held by COWL</span><b class="num">0</b></div>
+    <div><span class="kicker">COWL fee</span><b class="num">0%</b></div>
+    <div><span class="kicker">Latest block</span><b class="num mono" data-stat="head">—</b></div>
+  </div>
+</section>
+
+<!-- ============================ STORY (digulir) ============================ -->
+<section class="story" id="story" aria-label="How a hood works">
+  <div class="story-sticky">
+    <div class="story-rail" aria-hidden="true"><i data-rail="0"></i><i data-rail="1"></i><i data-rail="2"></i><i data-rail="3"></i></div>
+    <div class="story-copy">
+      <article data-act="0"><span class="kicker">01 · Exposed</span><h2>This is what <em>everyone</em> sees.</h2><p>On Robinhood Chain an address is an open brokerage statement. Pay someone once and they can read every share you hold, every trade you made, every wallet you touch.</p></article>
+      <article data-act="1"><span class="kicker">02 · Hooded</span><h2>Share a link, <em>not an address.</em></h2><p>Your COWL link carries public receive keys, not your wallet. Senders pay the link. Your statement locks away.</p>
+        <button class="hold" type="button" data-hold><span class="hold-ring"></span><span class="hold-label">Hold to see what a sender sees</span></button></article>
+      <article data-act="2"><span class="kicker">03 · Landed</span><h2>Every payment lands <em>somewhere new.</em></h2><p>Each payment creates a one-time address, derived on the spot. Ten payments, ten addresses, and no thread between them.</p></article>
+      <article data-act="3"><span class="kicker">04 · Only you</span><h2>Only <em>your key</em> can find them.</h2><p>Your browser checks every public announcement with your viewing key. The ones that light up are yours. Move them wherever you choose.</p></article>
+    </div>
+    <div class="stage" aria-hidden="true">
+      <div class="statement" id="statement">
+        <div class="st-head"><div><span class="kicker">Wallet</span><b class="mono">0x9A3f…e21C</b></div><div class="st-total"><span class="kicker">Portfolio</span><b class="num" data-scramble>$48,212.40</b></div></div>
+        <div class="st-rows">
+          <div class="st-row"><span class="tok">NVDA</span><span>NVIDIA</span><b class="num" data-scramble>42.18</b><b class="num" data-scramble>$7,941.30</b></div>
+          <div class="st-row"><span class="tok">TSLA</span><span>Tesla</span><b class="num" data-scramble>31.02</b><b class="num" data-scramble>$13,420.08</b></div>
+          <div class="st-row"><span class="tok">SPCX</span><span>SpaceX</span><b class="num" data-scramble>118.40</b><b class="num" data-scramble>$9,812.44</b></div>
+          <div class="st-row"><span class="tok">AAPL</span><span>Apple</span><b class="num" data-scramble>27.75</b><b class="num" data-scramble>$6,903.21</b></div>
+          <div class="st-row"><span class="tok eth">ETH</span><span>Ether</span><b class="num" data-scramble>4.120</b><b class="num" data-scramble>$10,135.37</b></div>
+        </div>
+        <div class="st-tx"><span class="kicker">Recent</span>
+          <div class="mono"><span>Received 1,200 USDG</span><span data-scramble>from 0x51C7…2a7F</span></div>
+          <div class="mono"><span>Sold 12 TSLA</span><span data-scramble>to 0x8366…0951</span></div>
+        </div>
+        <div class="landed mono" aria-hidden="true">
+        <span>0x7f3e…b91a</span><span>0x0c41…77de</span><span class="me">0x9b2d…04f1</span><span>0x51aa…e930</span>
+        <span>0xd8c0…1b7e</span><span class="me">0x2e96…c38a</span><span>0xa413…5f02</span><span>0x66b7…d0c9</span>
+        <span>0x3f08…a2e4</span><span>0xc9e1…7731</span><span>0x18d5…9fb0</span><span class="me">0xe0a7…4c16</span>
+      </div>
+      <div class="st-sender mono"><span class="kicker">What the sender sees</span><b>Paid → 0x7f3e…b91a</b><span>Owner: unknown · first seen just now</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ HOW ============================ -->
+<section class="how" id="how">
+  <div class="sec-head"><span class="kicker">How it works</span><h2>Three moves. <em>No new wallet.</em></h2></div>
+  <div class="how-grid">
+    <article>
+      <span class="how-n mono">01</span>
+      <h3>Unlock</h3>
+      <p>Sign one fixed message with the wallet you already use. Free, no transaction. Your browser derives a viewing key and a spending key.</p>
+      <div class="mini"><div class="mini-row"><span>Signature</span><b class="ok">Free · 0 gas</b></div><div class="mini-row"><span>Keys leave browser</span><b class="ok">Never</b></div></div>
+    </article>
+    <article>
+      <span class="how-n mono">02</span>
+      <h3>Share your link</h3>
+      <p>Post it in your bio, send it to a client, print it as a QR. Anyone with ETH or a stock token on Robinhood Chain can pay it.</p>
+      <div class="mini"><div class="mini-link mono">cowl.pro/pay/0x9A3f…e21C</div><div class="mini-row"><span>Senders see your wallet</span><b class="ok">No</b></div></div>
+    </article>
+    <article>
+      <span class="how-n mono">03</span>
+      <h3>Withdraw anywhere</h3>
+      <p>Your Inbox finds each payment and moves it in one click, gas included by the sender. Send it to a fresh wallet to stay hooded.</p>
+      <div class="mini"><div class="mini-row"><span><span class="tok" style="width:22px;height:22px;font-size:8px">NVDA</span> 1.5 NVDA</span><b>Withdraw →</b></div><div class="mini-row"><span>COWL fee</span><b>0</b></div></div>
+    </article>
+  </div>
+  <div class="assets">
+    <span class="kicker">Send ETH, any ERC-20, and every Robinhood stock token</span>
+    <div class="asset-chips" id="asset-chips"></div>
+  </div>
+</section>
+
+<!-- ============================ PROOF ============================ -->
+<section class="proof" id="proof">
+  <div class="sec-head"><span class="kicker">Proof, not promises</span><h2>Don't trust us. <em>Verify it.</em></h2>
+    <p>Everything below is live on Robinhood Chain. Every claim links to the block explorer, so you can check it without asking us.</p></div>
+  <div class="proof-grid">
+    <article class="pf pf-code">
+      <span class="kicker"><i class="ok-dot"></i> Source verified</span>
+      <h3>Read the whole contract. <em>It is short.</em></h3>
+      <p>The COWL Router is under 80 lines. No owner, no fee, no admin switch, no upgrade path. It forwards a payment and logs one announcement. That is all it can do.</p>
+      <div class="pf-row"><span>Router</span><a class="mono" data-proof="router" target="_blank" rel="noopener">0x5A25…8590 ↗</a></div>
+      <div class="pf-row"><span>Functions</span><b class="mono">sendEth · sendToken</b></div>
+      <div class="pf-row"><span>Owner / admin</span><b class="good">None</b></div>
+    </article>
+    <article class="pf pf-bal">
+      <span class="kicker"><span class="dot-live"></span> Live balance</span>
+      <h3>Funds held by COWL</h3>
+      <div class="pf-big num" data-router-balance>0.000000 <small>ETH</small></div>
+      <p>Read from the chain every few seconds. Payments go straight from the sender to a one-time address. Nothing waits in a pool.</p>
+      <a class="pf-link" data-proof="routerBalance" target="_blank" rel="noopener">Check it on Blockscout ↗</a>
+    </article>
+    <article class="pf pf-run">
+      <span class="kicker"><i class="ok-dot"></i> Tested with real money</span>
+      <h3>Sent, found, withdrawn. <em>On mainnet.</em></h3>
+      <ol class="pf-steps">
+        <li><span class="mono" data-proof-time="routerDeployedAt">20:44 UTC</span><div><b>Router deployed</b><a class="mono" data-proof="routerDeployTx" target="_blank" rel="noopener">tx ↗</a></div></li>
+        <li><span class="mono" data-proof-time="firstSendAt">20:45 UTC</span><div><b>0.0002 ETH sent to a one-time address</b><a class="mono" data-proof="firstSendTx" target="_blank" rel="noopener">tx ↗</a> <a class="mono" data-proof="firstStealth" target="_blank" rel="noopener">address ↗</a></div></li>
+        <li><span class="mono" data-proof-time="firstWithdrawAt">20:45 UTC</span><div><b>Found with the viewing key, withdrawn</b><a class="mono" data-proof="firstWithdrawTx" target="_blank" rel="noopener">tx ↗</a></div></li>
+      </ol>
+      <p class="pf-foot">Network cost of the whole round trip: under one cent. Before mainnet, the router and the full app flow passed tests on a fork of Robinhood Chain with real NVDA stock tokens.</p>
+    </article>
+    <article class="pf pf-std">
+      <span class="kicker"><i class="ok-dot"></i> Open standards</span>
+      <h3>Not our invention. <em>That's the point.</em></h3>
+      <p>COWL is a thin layer over two Ethereum standards whose contracts were already live on Robinhood Chain before COWL existed.</p>
+      <div class="pf-row"><span><a href="https://eips.ethereum.org/EIPS/eip-5564" target="_blank" rel="noopener">ERC-5564</a> Announcer</span><a class="mono" data-proof="announcer" target="_blank" rel="noopener">0x5564…5564 ↗</a></div>
+      <div class="pf-row"><span><a href="https://eips.ethereum.org/EIPS/eip-6538" target="_blank" rel="noopener">ERC-6538</a> Registry</span><a class="mono" data-proof="registry" target="_blank" rel="noopener">0x6538…6538 ↗</a></div>
+      <div class="pf-row"><span>Stealth payments on chain</span><b class="num" data-stat="announcements">—</b></div>
+      <div class="pf-row"><span>Sent through COWL</span><b class="num" data-stat="viaCowl">—</b></div>
+    </article>
+  </div>
+  <div class="verify-self">
+    <div><span class="kicker">Verify it yourself in 60 seconds</span><h3>Four checks. <em>No trust required.</em></h3></div>
+    <ol>
+      <li><b>01</b><span>Open the Router on Blockscout and read the Code tab. Look for an owner or a fee. There is none.</span></li>
+      <li><b>02</b><span>Check its balance. It is zero, and it stays zero after every payment.</span></li>
+      <li><b>03</b><span>Create your link and send yourself 0.0001 ETH from another wallet. Watch it land at an address that has never touched yours.</span></li>
+      <li><b>04</b><span>Open your Inbox and withdraw it. Your keys came from one signature and never left the tab.</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================ HONEST ============================ -->
+<section class="honest" id="honest">
+  <div class="sec-head"><span class="kicker">Honest by design</span><h2>A hood hides a face, <em>not a crowd.</em></h2>
+    <p>Privacy tools fail when they overpromise. Here is exactly what COWL changes on-chain and what it does not.</p></div>
+  <div class="ledger">
+    <div class="ledger-col"><span class="kicker">Hidden</span>
+      <div class="ledger-row"><b>Who received</b><span>Funds land in a one-time address, not your wallet.</span></div>
+      <div class="ledger-row"><b>Links between payments</b><span>Every payment gets its own address.</span></div>
+      <div class="ledger-row"><b>Your keys</b><span>Derived and used only inside your browser.</span></div>
+    </div>
+    <div class="ledger-col public"><span class="kicker">Still public</span>
+      <div class="ledger-row"><b>Amount and asset</b><span>Visible on Blockscout like any transfer.</span></div>
+      <div class="ledger-row"><b>The sender's wallet</b><span>The payer is not hidden.</span></div>
+      <div class="ledger-row"><b>Where you withdraw to</b><span>Withdraw to your main wallet and the link is back.</span></div>
+    </div>
+  </div>
+  <div class="contracts">
+    <div><span class="kicker">ERC-5564 Announcer</span><a class="mono" data-addr="announcer" target="_blank" rel="noopener">0x5564…5564</a><small>Standard contract, already live</small></div>
+    <div><span class="kicker">ERC-6538 Registry</span><a class="mono" data-addr="registry" target="_blank" rel="noopener">0x6538…6538</a><small>Standard contract, already live</small></div>
+    <div><span class="kicker">COWL Router</span><a class="mono" data-addr="router" target="_blank" rel="noopener">Deploying…</a><small>No owner · no fee · holds nothing</small></div>
+    <div><span class="kicker">Audit</span><b>Not yet</b><small>Source verified. Read it, it is short.</small></div>
+  </div>
+</section>
+
+<!-- ============================ FAQ ============================ -->
+<section class="faq" id="faq">
+  <div class="sec-head"><span class="kicker">FAQ</span><h2>Questions, <em>answered plainly.</em></h2></div>
+  <div class="faq-list">
+    <details><summary>Is COWL a mixer?</summary><p>No. There is no shared pool and nothing is mixed. Each payment goes straight from the sender to a one-time address that belongs to the receiver. COWL never holds funds.</p></details>
+    <details><summary>Can COWL take or freeze my money?</summary><p>No. The router has no owner and no admin functions, and it never holds a balance. Only your spending key can move funds out of your one-time addresses. Note that stock token issuers can still pause their own tokens.</p></details>
+    <details><summary>What if cowl.pro goes offline?</summary><p>Your funds stay where they are. Announcements live on Robinhood Chain, and your keys come back from one signature, so any ERC-5564 tool can find and move them.</p></details>
+    <details><summary>Which wallets work?</summary><p>Any regular EVM wallet: MetaMask, Rabby, Phantom (enable Robinhood Chain under Active Networks) and others. Smart-contract wallets may sign differently each time, so they are not recommended.</p></details>
+    <details><summary>Who pays gas to withdraw a token?</summary><p>The sender. Each token payment carries a tiny amount of ETH (0.00002) to the one-time address, so you can withdraw without funding it first.</p></details>
+    <details><summary>What does $COWL do?</summary><p>$COWL is the community token for the project. The app is free and does not require it. Creator fees fund servers and, next, a relayer so withdrawals need no ETH at all.</p></details>
+  </div>
+</section>
+
+<!-- ============================ CTA ============================ -->
+<section class="final">
+  <div class="final-space" aria-hidden="true"></div>
+  <h2>Put a hood on <em>your wallet.</em></h2>
+  <p>One signature. One link. Every payment, under the hood.</p>
+  <a class="btn primary" href="/receive">Create your link <span class="arrow">→</span></a>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="foot-top">
+    <div><a class="brand" href="/"><img src="/assets/cowl-mark.svg" width="30" height="30" alt=""><span class="word">COWL</span></a><p>Private receive links on Robinhood Chain.</p></div>
+    <div class="foot-links"><span class="kicker">Product</span><a href="/receive">Receive</a><a href="/send">Send</a><a href="/inbox">Inbox</a></div>
+    <div class="foot-links"><span class="kicker">Trust</span><a href="/transparency">Transparency</a><a href="#faq">FAQ</a><a data-addr="router" target="_blank" rel="noopener">Router source</a></div>
+    <div class="foot-links"><span class="kicker">Official links</span><a href="https://x.com/cowlhq" data-social="x" target="_blank" rel="noopener">X · @cowlhq</a><a href="https://t.me/cowlhq" data-social="telegram" target="_blank" rel="noopener">Telegram</a><a data-buy target="_blank" rel="noopener">Pons</a></div>
+  </div>
+  <div class="foot-ca"><span class="kicker">$COWL contract</span><code class="mono" data-ca-full>Appears here at launch</code></div>
+  <p class="foot-note">COWL is open-source software, not a bank or broker. Amounts and senders remain public on-chain. Not financial advice. Unaudited; use at your own risk.</p>
+  <div class="foot-word" aria-hidden="true">COWL</div>
+</footer>
+</body>
+</html>

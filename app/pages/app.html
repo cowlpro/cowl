@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>COWL App · Private receive links on Robinhood Chain</title>
+<meta name="description" content="Create a private receive link, send to one, and withdraw from your Inbox. Stealth addresses (ERC-5564) on Robinhood Chain.">
+<meta name="theme-color" content="#000000">
+<meta property="og:title" content="COWL · Put a hood on your wallet">
+<meta property="og:description" content="Private receive links on Robinhood Chain. Every payment lands in a fresh address only you can open.">
+<meta property="og:image" content="https://cowl.pro/assets/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"></noscript>
+<link rel="stylesheet" href="/styles.css?v=__V__">
+<link rel="stylesheet" href="/app.css?v=__V__">
+<script src="/assets/app.js?v=__V__" type="module"></script>
+</head>
+<body class="app">
+<div class="app-bg" aria-hidden="true"><img src="/assets/hood-app.webp?v=__V__" alt=""></div>
+
+<header class="app-top">
+  <a class="brand" href="/" aria-label="COWL home"><img src="/assets/cowl-mark.svg" width="30" height="30" alt=""><span class="word">COWL</span></a>
+  <nav class="tabs" aria-label="App sections">
+    <a href="/receive" data-view="receive">Receive</a>
+    <a href="/send" data-view="send">Send</a>
+    <a href="/inbox" data-view="inbox">Inbox <span class="badge" id="inbox-badge" hidden></span></a>
+  </nav>
+  <div class="top-right">
+    <div class="ca-chip" id="ca-chip" hidden><span class="lbl">CA</span><span class="mono" id="ca-short"></span><button type="button" id="ca-copy" aria-label="Copy contract address"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></button></div>
+    <a class="icon-btn social" data-social="x" href="#" target="_blank" rel="noopener" aria-label="COWL on X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.8 3h3.1l-6.8 7.8 8 10.2h-6.3l-4.9-6.4L5.3 21H2.2l7.3-8.3L1.8 3h6.4l4.4 5.9L17.8 3Zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5Z"/></svg></a>
+    <a class="icon-btn social" data-social="telegram" href="#" target="_blank" rel="noopener" aria-label="COWL on Telegram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.4 4.6 18.3 19c-.2 1-.8 1.3-1.7.8l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.8 8.8-7.9c.4-.3-.1-.5-.6-.2L6.2 13 1.5 11.6c-1-.3-1-1 .2-1.5L20 3.2c.9-.3 1.6.2 1.4 1.4Z"/></svg></a>
+    <button class="btn small" id="wallet-btn" type="button">Connect wallet</button>
+  </div>
+</header>
+
+<main class="app-main">
+  <section class="pane" id="pane" aria-live="polite"></section>
+  <aside class="chain-view" aria-label="What the chain sees">
+    <div class="cv-head"><span class="kicker">What the chain sees</span><span class="cv-net"><span class="dot-live"></span> Robinhood Chain</span></div>
+    <svg class="cv-svg" viewBox="0 0 340 300" role="img" aria-label="Sender pays a one-time address; the receiver's wallet is not linked">
+      <defs>
+        <linearGradient id="cv-line" x1="0" x2="1"><stop offset="0" stop-color="#8a8a90" stop-opacity=".1"/><stop offset=".5" stop-color="#f4f4f2"/><stop offset="1" stop-color="#8a8a90" stop-opacity=".1"/></linearGradient>
+      </defs>
+      <g class="cv-node" id="cv-sender"><rect x="20" y="22" width="300" height="58" rx="12"/><text x="40" y="46" class="cv-t">Sender wallet</text><text x="40" y="66" class="cv-s mono" id="cv-sender-addr">0xYou…public</text><text x="300" y="46" class="cv-tag" text-anchor="end">PUBLIC</text></g>
+      <path class="cv-flow" d="M170 80 V120"/>
+      <circle class="cv-pulse" r="3.5" cx="170" cy="80"><animate attributeName="cy" values="80;120" dur="1.6s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="1.6s" repeatCount="indefinite"/></circle>
+      <g class="cv-node accent" id="cv-stealth"><rect x="20" y="120" width="300" height="58" rx="12"/><text x="40" y="144" class="cv-t">One-time address</text><text x="40" y="164" class="cv-s mono" id="cv-stealth-addr">0x7f3e…new every time</text><text x="300" y="144" class="cv-tag ember" text-anchor="end">FRESH</text></g>
+      <path class="cv-hidden" d="M170 178 V220"/>
+      <text x="182" y="204" class="cv-s">no on-chain link</text>
+      <g class="cv-node ghost" id="cv-receiver"><rect x="20" y="220" width="300" height="58" rx="12"/><text x="40" y="244" class="cv-t">Your wallet</text><text x="40" y="264" class="cv-s mono">hidden under the hood</text><text x="300" y="244" class="cv-tag" text-anchor="end">PRIVATE</text></g>
+    </svg>
+    <ul class="cv-facts">
+      <li><span>Amount &amp; asset</span><b>Public</b></li>
+      <li><span>Sender wallet</span><b>Public</b></li>
+      <li><span>Receiver wallet</span><b class="ok">Hidden</b></li>
+      <li><span>Funds held by COWL</span><b class="ok">Never</b></li>
+    </ul>
+    <a class="cv-more" href="/transparency">Read exactly what stays public →</a>
+  </aside>
+</main>
+
+<footer class="app-foot">
+  <span>Non-custodial · ERC-5564 / ERC-6538 · Keys never leave your browser</span>
+  <span id="foot-router"></span>
+</footer>
+
+<dialog id="modal" class="modal"><div class="modal-body" id="modal-body"></div></dialog>
+</body>
+</html>

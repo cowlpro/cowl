@@ -1,0 +1,23 @@
+{
+  "name": "cowl",
+  "private": true,
+  "type": "module",
+  "description": "COWL \u2014 private receive links (ERC-5564 stealth addresses) on Robinhood Chain",
+  "license": "MIT",
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "start": "node server/server.mjs",
+    "test": "node --test test/stealth.test.mjs",
+    "test:e2e": "node test/e2e.mjs"
+  },
+  "dependencies": {
+    "@noble/curves": "1.9.7",
+    "@noble/hashes": "1.8.0",
+    "ethers": "6.15.0",
+    "qrcode-generator": "1.4.4",
+    "three": "0.169.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10"
+  }
+}

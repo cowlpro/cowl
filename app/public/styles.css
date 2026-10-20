@@ -1,0 +1,90 @@
+/* COWL — sistem desain bersama (landing + app). Hitam AMOLED, perak, aksen bara kecil. */
+:root {
+  color-scheme: dark;
+  --bg: #000;
+  --panel: #0b0b0c;
+  --panel-2: #111113;
+  --line: #1d1d20;
+  --line-2: #2a2a2e;
+  --ink: #f4f4f2;
+  --ink-2: #c9c9cc;
+  --muted: #8a8a90;
+  --faint: #5a5a60;
+  --ember: #ff5a36;
+  --ember-soft: #ff5a3622;
+  --good: #7ee0b0;
+  --warn: #ffb547;
+  --bad: #ff6b6b;
+  --silver: linear-gradient(180deg, #ffffff 0%, #c9cbd0 55%, #8d9097 100%);
+  --radius: 14px;
+  --sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans);
+  font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: 0; }
+::selection { background: var(--ember); color: #000; }
+:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; border-radius: 6px; }
+.mono { font-family: var(--mono); font-feature-settings: 'zero' 1; }
+.num { font-variant-numeric: tabular-nums; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- tombol ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  height: 46px; padding: 0 20px; border-radius: 999px; font-size: 14px; font-weight: 500;
+  border: 1px solid var(--line-2); background: #0e0e10; color: var(--ink);
+  transition: transform .2s, background .2s, border-color .2s, opacity .2s; white-space: nowrap;
+}
+.btn:hover { border-color: #3a3a40; background: #151518; }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--ink); color: #000; border-color: var(--ink); }
+.btn.primary:hover { background: #fff; }
+.btn.small { height: 36px; padding: 0 14px; font-size: 13px; }
+.btn.block { width: 100%; }
+.btn[disabled] { opacity: .45; pointer-events: none; }
+.btn .arrow { transition: transform .2s; }
+.btn:hover .arrow { transform: translateX(3px); }
+
+/* ---------- label kecil ---------- */
+.kicker {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+}
+.dot-live { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 0 0 var(--ember-soft); animation: pulse 2.4s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 #ff5a3655; } 70% { box-shadow: 0 0 0 8px #ff5a3600; } 100% { box-shadow: 0 0 0 0 #ff5a3600; } }
+
+/* ---------- logo ---------- */
+.brand { display: inline-flex; align-items: center; gap: 10px; }
+.brand { gap: 12px; }
+.brand img { width: 30px; height: 30px; }
+.brand .word { font-weight: 500; letter-spacing: .34em; font-size: 14.5px; margin-right: -.34em; }
+
+/* ---------- chip CA & ikon sosial ---------- */
+.ca-chip {
+  display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 6px 0 12px;
+  border: 1px solid var(--line-2); border-radius: 999px; font-size: 12px; color: var(--ink-2); background: #0a0a0b;
+}
+.ca-chip .lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; color: var(--muted); }
+.ca-chip button { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); }
+.ca-chip button:hover { color: var(--ink); background: #1a1a1d; }
+.icon-btn {
+  width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  border: 1px solid var(--line-2); color: var(--ink-2); background: #0a0a0b; transition: color .2s, border-color .2s;
+}
+.icon-btn:hover { color: var(--ink); border-color: #3a3a40; }
+.icon-btn svg { width: 15px; height: 15px; }
+
+/* ---------- toast ---------- */
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0; z-index: 90;
+  background: #151517; border: 1px solid var(--line-2); padding: 10px 16px; border-radius: 999px; font-size: 13px;
+  transition: opacity .25s, transform .25s; pointer-events: none; max-width: calc(100vw - 32px);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+[hidden] { display: none !important; }

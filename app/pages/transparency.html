@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Transparency · COWL</title>
+<meta name="description" content="Exactly what COWL hides, what stays public, which contracts it uses, and what is not audited yet.">
+<meta name="theme-color" content="#000000">
+<meta property="og:title" content="COWL Transparency">
+<meta property="og:description" content="What a hood hides, and what it does not.">
+<meta property="og:image" content="https://cowl.pro/assets/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="/styles.css?v=__V__">
+<link rel="stylesheet" href="/landing.css?v=__V__">
+<style>
+  .doc { max-width: 860px; margin: 0 auto; padding: 140px 24px 80px; }
+  .doc h1 { font-size: clamp(38px, 5vw, 64px); letter-spacing: -.045em; line-height: 1.02; font-weight: 600; margin: 14px 0 18px; }
+  .doc h1 span { color: var(--muted); }
+  .doc .lead { color: var(--ink-2); font-size: 17px; max-width: 640px; margin: 0 0 56px; }
+  .doc h2 { font-size: 24px; letter-spacing: -.02em; font-weight: 600; margin: 64px 0 16px; }
+  .doc p, .doc li { color: var(--ink-2); }
+  .doc table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  .doc th, .doc td { text-align: left; padding: 14px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .doc th { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 400; }
+  .doc td:first-child { color: var(--ink); width: 34%; }
+  .ok { color: var(--good); } .pub { color: var(--warn); }
+  .doc pre { background: #070708; border: 1px solid var(--line); border-radius: 14px; padding: 18px; overflow: auto; font-family: var(--mono); font-size: 13px; color: var(--ink-2); line-height: 1.6; }
+  .doc a.u { text-decoration: underline; text-underline-offset: 3px; color: var(--ink); }
+  .doc code { font-family: var(--mono); font-size: 13px; color: var(--ink); overflow-wrap: anywhere; }
+</style>
+</head>
+<body class="landing">
+<header class="nav solid">
+  <a class="brand" href="/" aria-label="COWL home"><img src="/assets/cowl-mark.svg" width="30" height="30" alt=""><span class="word">COWL</span></a>
+  <nav class="nav-links" aria-label="Main"><a href="/#how">How it works</a><a href="/transparency">Transparency</a><a href="/#faq">FAQ</a></nav>
+  <div class="nav-right">
+    <a class="icon-btn" href="https://x.com/cowlhq" target="_blank" rel="noopener" aria-label="COWL on X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.8 3h3.1l-6.8 7.8 8 10.2h-6.3l-4.9-6.4L5.3 21H2.2l7.3-8.3L1.8 3h6.4l4.4 5.9L17.8 3Zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5Z"/></svg></a>
+    <a class="icon-btn" href="https://t.me/cowlhq" target="_blank" rel="noopener" aria-label="COWL on Telegram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.4 4.6 18.3 19c-.2 1-.8 1.3-1.7.8l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.8 8.8-7.9c.4-.3-.1-.5-.6-.2L6.2 13 1.5 11.6c-1-.3-1-1 .2-1.5L20 3.2c.9-.3 1.6.2 1.4 1.4Z"/></svg></a>
+    <a class="btn small primary" href="/receive">Open app</a>
+  </div>
+</header>
+<main class="doc">
+  <span class="kicker">Transparency</span>
+  <h1>What the hood hides. <span>And what it doesn't.</span></h1>
+  <p class="lead">COWL uses stealth addresses (ERC-5564). It breaks the on-chain link between a payment and the person who receives it. It does not make transactions invisible. Here is the full picture.</p>
+
+  <h2>On-chain visibility</h2>
+  <table>
+    <thead><tr><th>Information</th><th>Status</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Receiver's main wallet</td><td class="ok">Hidden</td><td>Funds go to a one-time address derived from the receiver's public keys and a random value only the sender knows.</td></tr>
+      <tr><td>Link between two payments</td><td class="ok">Hidden</td><td>Each payment uses a new one-time address.</td></tr>
+      <tr><td>Receiver's private keys</td><td class="ok">Never shared</td><td>Derived from a wallet signature inside the browser. Never sent to any server.</td></tr>
+      <tr><td>Amount and asset</td><td class="pub">Public</td><td>Transfers on Robinhood Chain are public. COWL does not encrypt amounts.</td></tr>
+      <tr><td>Sender's wallet</td><td class="pub">Public</td><td>The payer signs a normal transaction from their own wallet.</td></tr>
+      <tr><td>Withdrawal destination</td><td class="pub">Public</td><td>Withdrawing to your main wallet links that payment to it. Withdraw to a fresh wallet to stay hidden.</td></tr>
+      <tr><td>Registered receive keys</td><td class="pub">Public</td><td>Registering a short link publishes your public keys next to your address. Incoming payments are still unlinkable.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Contracts</h2>
+  <table>
+    <tbody>
+      <tr><td>ERC-5564 Announcer</td><td><a class="u" data-addr="announcer" target="_blank" rel="noopener"><code data-addr-text="announcer"></code></a><br>Standard contract, deployed with the canonical CREATE2 address. Logs each payment.</td></tr>
+      <tr><td>ERC-6538 Registry</td><td><a class="u" data-addr="registry" target="_blank" rel="noopener"><code data-addr-text="registry"></code></a><br>Standard contract. Maps a wallet to its public receive keys.</td></tr>
+      <tr><td>COWL Router</td><td><a class="u" data-addr="router" target="_blank" rel="noopener"><code data-addr-text="router">Deploying</code></a><br>Sends ETH or a token to the one-time address and calls the Announcer in the same transaction. No owner, no fee, no admin functions, never holds a balance. Source verified on Blockscout.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Mainnet proof</h2>
+  <p>Before launch, the router was deployed and tested with real funds on Robinhood Chain. Every step is public.</p>
+  <table>
+    <tbody>
+      <tr><td>Router deployed</td><td>18 Oct 2026 · 20:44 UTC · <a class="u" target="_blank" rel="noopener" href="https://robinhoodchain.blockscout.com/tx/0x66dc0a7f80553177254131e43bc1cabc8dc2be689b3afa7e96ba337c908daaa1"><code>0x66dc…aaa1</code></a></td></tr>
+      <tr><td>Source verified</td><td>Blockscout, solc 0.8.26, optimizer 1,000,000 runs · <a class="u" target="_blank" rel="noopener" href="https://robinhoodchain.blockscout.com/address/0x5A254fE1f65e5cbBe978095ab4632E7446Bd8590?tab=contract">read the code</a></td></tr>
+      <tr><td>First private payment</td><td>0.0002 ETH to one-time address <a class="u" target="_blank" rel="noopener" href="https://robinhoodchain.blockscout.com/address/0x77113fef7e1aafd98cc9b66fe60e42acdb662e22"><code>0x7711…2e22</code></a> · <a class="u" target="_blank" rel="noopener" href="https://robinhoodchain.blockscout.com/tx/0x2540cd6630b5713588ae70f84de7196e61fe516b29d0dadabf0c6f1d379620bb">tx</a></td></tr>
+      <tr><td>First withdrawal</td><td>Found with the viewing key, moved with the one-time key · <a class="u" target="_blank" rel="noopener" href="https://robinhoodchain.blockscout.com/tx/0x4e28cf14f2a09e6162eaba0edb6e510c041146cc25388a451c9431ea61ebc9ed">tx</a></td></tr>
+      <tr><td>Pre-mainnet tests</td><td>Router unit tests and the full app flow (register, send ETH, send NVDA, scan, withdraw) passed on a fork of Robinhood Chain using the live Announcer and real NVDA stock tokens.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The message you sign</h2>
+  <p>Your keys come from your wallet's signature of this exact text. Signing it costs nothing and authorizes nothing. If any site asks you to sign it, it can derive your COWL keys, so sign it only on cowl.pro.</p>
+  <pre>COWL · Unlock your private receive keys
+
+Signing is free. It sends nothing and moves nothing.
+This signature stays in your browser.
+
+Network: Robinhood Chain (4663)
+Key version: 1</pre>
+
+  <h2>Not done yet</h2>
+  <ul>
+    <li><b>Independent audit:</b> not yet. The router is short and verified; the cryptography follows ERC-5564 scheme 1 with the audited <code>@noble/curves</code> library.</li>
+    <li><b>Relayer:</b> withdrawals currently use a small amount of ETH sent along by the payer. A relayer is next.</li>
+    <li><b>Hidden amounts:</b> not planned without zero-knowledge proofs and an audit. We will not claim it.</li>
+  </ul>
+
+  <h2>Outside COWL's control</h2>
+  <p>Robinhood stock tokens are issued with controls: the issuer can pause transfers or block addresses. COWL cannot override this. Timing and amount patterns can also hint at who received a payment; vary them if that matters to you.</p>
+</main>
+<footer class="foot"><p class="foot-note">COWL is open-source software, not a bank or broker. Unaudited; use at your own risk.</p><div class="foot-word" aria-hidden="true">COWL</div></footer>
+<script type="module">
+  const c = await fetch('/config.json', { cache: 'no-store' }).then((r) => r.json());
+  for (const k of ['announcer', 'registry', 'router']) {
+    if (!c[k]) continue;
+    document.querySelectorAll(`[data-addr="${k}"]`).forEach((a) => (a.href = `${c.explorer}/address/${c[k]}${k === 'router' ? '?tab=contract' : ''}`));
+    document.querySelectorAll(`[data-addr-text="${k}"]`).forEach((e) => (e.textContent = c[k]));
+  }
+</script>
+</body>
+</html>

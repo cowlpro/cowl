@@ -1,0 +1,35 @@
+{
+  "chainId": 4663,
+  "chainName": "Robinhood Chain",
+  "explorer": "https://robinhoodchain.blockscout.com",
+  "rpcs": [
+    "https://robinhood-rpc.publicnode.com",
+    "https://robinhood.api.pocket.network",
+    "https://robinhood.drpc.org"
+  ],
+  "indexerRpcs": [
+    "https://robinhood.api.pocket.network",
+    "https://robinhood-rpc.publicnode.com"
+  ],
+  "walletRpc": "https://rpc.mainnet.chain.robinhood.com",
+  "announcer": "0x55649E01B5Df198D18D95b5cc5051630cfD45564",
+  "registry": "0x6538E6bf4B0eBd30A8Ea093027Ac2422ce5d6538",
+  "router": "0x5A254fE1f65e5cbBe978095ab4632E7446Bd8590",
+  "startBlock": 16159684,
+  "gasTipEth": "0.00002",
+  "site": "https://cowl.pro",
+  "x": "https://x.com/cowlhq",
+  "telegram": "https://t.me/cowlhq",
+  "proof": {
+    "routerDeployTx": "0x66dc0a7f80553177254131e43bc1cabc8dc2be689b3afa7e96ba337c908daaa1",
+    "routerDeployedAt": "2026-10-18T20:44:32Z",
+    "routerBlock": 92062508,
+    "firstSendTx": "0x2540cd6630b5713588ae70f84de7196e61fe516b29d0dadabf0c6f1d379620bb",
+    "firstSendAt": "2026-10-18T20:45:17Z",
+    "firstStealth": "0x77113fef7e1aafd98cc9b66fe60e42acdb662e22",
+    "firstWithdrawTx": "0x4e28cf14f2a09e6162eaba0edb6e510c041146cc25388a451c9431ea61ebc9ed",
+    "firstWithdrawAt": "2026-10-18T20:45:23Z",
+    "sendGasEth": "0.0000013",
+    "withdrawGasEth": "0.0000004"
+  }
+}

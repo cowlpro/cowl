@@ -1,0 +1,11 @@
+node_modules/
+contracts/out/
+contracts/cache/
+contracts/lib/
+app/public/assets/*.js
+app/public/*.html
+data/
+.env*
+.DS_Store
+contracts/local.txt
+contracts/chain.txt

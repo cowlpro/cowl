@@ -31,5 +31,6 @@
     "firstWithdrawAt": "2026-10-18T20:45:23Z",
     "sendGasEth": "0.0000013",
     "withdrawGasEth": "0.0000004"
-  }
+  },
+  "github": "https://github.com/cowlpro/cowl"
 }

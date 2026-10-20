@@ -41,6 +41,7 @@
     <div class="ca-chip" data-ca-chip><span class="lbl" data-ca-label>LAUNCH</span><span class="mono" data-ca-short>19 Oct · 13:00 UTC</span><button type="button" data-ca-copy hidden aria-label="Copy contract address"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></button></div>
     <a class="icon-btn" data-social="x" href="https://x.com/cowlhq" target="_blank" rel="noopener" aria-label="COWL on X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.8 3h3.1l-6.8 7.8 8 10.2h-6.3l-4.9-6.4L5.3 21H2.2l7.3-8.3L1.8 3h6.4l4.4 5.9L17.8 3Zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5Z"/></svg></a>
     <a class="icon-btn" data-social="telegram" href="https://t.me/cowlhq" target="_blank" rel="noopener" aria-label="COWL on Telegram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.4 4.6 18.3 19c-.2 1-.8 1.3-1.7.8l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.8 8.8-7.9c.4-.3-.1-.5-.6-.2L6.2 13 1.5 11.6c-1-.3-1-1 .2-1.5L20 3.2c.9-.3 1.6.2 1.4 1.4Z"/></svg></a>
+    <a class="icon-btn" data-social="github" href="https://github.com/cowlpro/cowl" target="_blank" rel="noopener" aria-label="COWL source on GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg></a>
     <a class="btn small primary" href="/receive">Open app</a>
   </div>
 </header>
@@ -68,6 +69,7 @@
       <a href="#proof"><i class="ok-dot"></i>Tested on mainnet</a>
       <span><i class="ok-dot"></i>Holds 0 ETH</span>
       <span><i class="ok-dot"></i>0% fee</span>
+      <a data-social="github" href="https://github.com/cowlpro/cowl" target="_blank" rel="noopener"><i class="ok-dot"></i>Open source</a>
     </div>
   </div>
 
@@ -202,7 +204,7 @@
   <div class="verify-self">
     <div><span class="kicker">Verify it yourself in 60 seconds</span><h3>Four checks. <em>No trust required.</em></h3></div>
     <ol>
-      <li><b>01</b><span>Open the Router on Blockscout and read the Code tab. Look for an owner or a fee. There is none.</span></li>
+      <li><b>01</b><span>Open the Router on Blockscout and read the Code tab, or the full source on <a data-social="github" href="https://github.com/cowlpro/cowl" target="_blank" rel="noopener">GitHub</a>. Look for an owner or a fee. There is none.</span></li>
       <li><b>02</b><span>Check its balance. It is zero, and it stays zero after every payment.</span></li>
       <li><b>03</b><span>Create your link and send yourself 0.0001 ETH from another wallet. Watch it land at an address that has never touched yours.</span></li>
       <li><b>04</b><span>Open your Inbox and withdraw it. Your keys came from one signature and never left the tab.</span></li>
@@ -230,7 +232,7 @@
     <div><span class="kicker">ERC-5564 Announcer</span><a class="mono" data-addr="announcer" target="_blank" rel="noopener">0x5564…5564</a><small>Standard contract, already live</small></div>
     <div><span class="kicker">ERC-6538 Registry</span><a class="mono" data-addr="registry" target="_blank" rel="noopener">0x6538…6538</a><small>Standard contract, already live</small></div>
     <div><span class="kicker">COWL Router</span><a class="mono" data-addr="router" target="_blank" rel="noopener">Deploying…</a><small>No owner · no fee · holds nothing</small></div>
-    <div><span class="kicker">Audit</span><b>Not yet</b><small>Source verified. Read it, it is short.</small></div>
+    <div><span class="kicker">Audit</span><b>Not yet</b><small>Source verified and <a data-social="github" href="https://github.com/cowlpro/cowl" target="_blank" rel="noopener">open on GitHub</a>.</small></div>
   </div>
 </section>
 
@@ -260,8 +262,8 @@
   <div class="foot-top">
     <div><a class="brand" href="/"><img src="/assets/cowl-mark.svg" width="30" height="30" alt=""><span class="word">COWL</span></a><p>Private receive links on Robinhood Chain.</p></div>
     <div class="foot-links"><span class="kicker">Product</span><a href="/receive">Receive</a><a href="/send">Send</a><a href="/inbox">Inbox</a></div>
-    <div class="foot-links"><span class="kicker">Trust</span><a href="/transparency">Transparency</a><a href="#faq">FAQ</a><a data-addr="router" target="_blank" rel="noopener">Router source</a></div>
-    <div class="foot-links"><span class="kicker">Official links</span><a href="https://x.com/cowlhq" data-social="x" target="_blank" rel="noopener">X · @cowlhq</a><a href="https://t.me/cowlhq" data-social="telegram" target="_blank" rel="noopener">Telegram</a><a data-buy target="_blank" rel="noopener">Pons</a></div>
+    <div class="foot-links"><span class="kicker">Trust</span><a href="/transparency">Transparency</a><a href="#faq">FAQ</a><a data-addr="router" target="_blank" rel="noopener">Router source</a><a href="https://github.com/cowlpro/cowl" data-social="github" target="_blank" rel="noopener">GitHub</a></div>
+    <div class="foot-links"><span class="kicker">Official links</span><a href="https://x.com/cowlhq" data-social="x" target="_blank" rel="noopener">X · @cowlhq</a><a href="https://t.me/cowlhq" data-social="telegram" target="_blank" rel="noopener">Telegram</a><a href="https://github.com/cowlpro/cowl" data-social="github" target="_blank" rel="noopener">GitHub</a><a data-buy target="_blank" rel="noopener">Pons</a></div>
   </div>
   <div class="foot-ca"><span class="kicker">$COWL contract</span><code class="mono" data-ca-full>Appears here at launch</code></div>
   <p class="foot-note">COWL is open-source software, not a bank or broker. Amounts and senders remain public on-chain. Not financial advice. Unaudited; use at your own risk.</p>

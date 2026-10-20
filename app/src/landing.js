@@ -32,6 +32,8 @@ function applyLive() {
   }
   const pons = ca ? `https://www.ponsfamily.com/launchpad/${ca.toLowerCase()}` : '';
   $$('[data-buy]').forEach((a) => { if (ca) { a.href = pons; a.target = '_blank'; a.rel = 'noopener'; a.removeAttribute('aria-disabled'); } });
+  // grafik DexScreener (alamat token huruf kecil)
+  $$('[data-chart]').forEach((a) => { if (ca) { a.href = `https://dexscreener.com/robinhood/${ca.toLowerCase()}`; a.target = '_blank'; a.rel = 'noopener'; a.removeAttribute('aria-disabled'); } });
   $$('[data-contract]').forEach((a) => { if (ca) { a.href = `${CFG.explorer || 'https://robinhoodchain.blockscout.com'}/token/${ca}`; a.target = '_blank'; a.rel = 'noopener'; a.removeAttribute('aria-disabled'); } });
   const st = $('[data-cc-status]');
   if (ca) { st.classList.add('live'); $('[data-cc-status-text]').textContent = 'Live on Pons'; }

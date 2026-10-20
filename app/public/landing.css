@@ -75,7 +75,8 @@ body.landing { background: #000; }
 .cc-ca-row code { flex: 1; min-width: 0; font-size: 12.5px; color: var(--ink); overflow-wrap: anywhere; line-height: 1.45; }
 .cc-verify { font-size: 12px; color: var(--muted); margin: 0 0 14px; }
 .cc-verify a { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
-.cc-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cc-actions { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 8px; }
+.cc-actions .btn { padding-left: 10px; padding-right: 10px; white-space: nowrap; }
 .cc-actions [aria-disabled='true'] { opacity: .4; pointer-events: none; }
 
 .hero-stats {

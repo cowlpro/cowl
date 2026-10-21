@@ -270,6 +270,7 @@ async function serveStatic(req, res, urlPath) {
   if (APP_ROUTES.some((r) => r.test(p))) p = '/app.html';
   else if (p === '/' ) p = '/index.html';
   else if (p === '/transparency' || p === '/transparency/') p = '/transparency.html';
+  else if (p === '/roadmap' || p === '/roadmap/') p = '/roadmap.html';
   const file = path.normalize(path.join(PUBLIC, p));
   if (!file.startsWith(PUBLIC) || path.basename(file).startsWith('.')) return send(res, 404, 'Not found');
   let st;

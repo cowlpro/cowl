@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Roadmap · COWL</title>
+<meta name="description" content="What COWL has shipped, what we are building now, and what comes next, in order. No dates.">
+<meta name="theme-color" content="#000000">
+<meta property="og:title" content="COWL Roadmap">
+<meta property="og:description" content="Shipped, building, next. In order, without dates.">
+<meta property="og:image" content="https://cowl.pro/assets/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="/styles.css?v=__V__">
+<link rel="stylesheet" href="/landing.css?v=__V__">
+<style>
+  .rm { max-width: 980px; margin: 0 auto; padding: 140px 24px 90px; }
+  .rm h1 { font-size: clamp(40px, 5.4vw, 72px); letter-spacing: -.045em; line-height: 1.0; font-weight: 600; margin: 14px 0 20px; }
+  .rm h1 em { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--ink-2); }
+  .rm .lead { color: var(--ink-2); font-size: 17.5px; max-width: 640px; margin: 0; }
+  .rules { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; margin: 44px 0 70px; }
+  .rules div { background: #070708; padding: 20px 22px; }
+  .rules b { display: block; font-weight: 500; font-size: 15px; margin-bottom: 6px; }
+  .rules span { color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+  .track { position: relative; padding-left: 46px; }
+  .track::before { content: ''; position: absolute; left: 15px; top: 8px; bottom: 8px; width: 1px; background: linear-gradient(180deg, var(--good) 0%, var(--good) 34%, var(--warn) 42%, #4a8dff 58%, var(--line-2) 74%); }
+  .phase { position: relative; margin-bottom: 26px; }
+  .phase .dot { position: absolute; left: -46px; top: 22px; width: 31px; height: 31px; border-radius: 50%; display: grid; place-items: center; font: 500 11px var(--mono); background: #000; border: 1px solid var(--line-2); color: var(--muted); }
+  .phase.done .dot { border-color: #7ee0b066; color: var(--good); }
+  .phase.now .dot { border-color: #ffb54788; color: var(--warn); box-shadow: 0 0 0 6px #ffb5470f; }
+  .phase.next .dot { border-color: #4a8dff88; color: #8fb3ff; }
+  .card { border: 1px solid var(--line); border-radius: 22px; padding: 26px 28px; background: linear-gradient(180deg, #0c0c0ee6, #070708e6); }
+  .phase.now .card { border-color: #ffb54733; }
+  .phase.explore .card { border-style: dashed; }
+  .ph-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .ph-head h2 { font-size: 26px; font-weight: 500; letter-spacing: -.02em; margin: 0; }
+  .pill { display: inline-flex; align-items: center; gap: 7px; font: 500 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; padding: 6px 11px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--muted); }
+  .pill.done { color: var(--good); border-color: #7ee0b044; background: #7ee0b00d; }
+  .pill.now { color: var(--warn); border-color: #ffb54744; background: #ffb5470d; }
+  .pill.now i { width: 6px; height: 6px; border-radius: 50%; background: var(--warn); animation: pulse 2.4s infinite; }
+  .pill.next { color: #8fb3ff; border-color: #4a8dff44; background: #4a8dff0d; }
+  .ph-intro { color: var(--ink-2); font-size: 15.5px; margin: 12px 0 18px; max-width: 680px; }
+  .items { display: grid; gap: 0; }
+  .it { display: grid; grid-template-columns: 1fr auto; gap: 6px 18px; padding: 15px 0; border-top: 1px solid var(--line); }
+  .it b { font-weight: 500; font-size: 15.5px; }
+  .it p { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; max-width: 720px; }
+  .it a { font: 400 12.5px var(--mono); color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+  .it a:hover { color: var(--ink); }
+  .it .tag { font: 400 12px var(--mono); color: var(--muted); }
+  .not { margin-top: 64px; }
+  .not h2 { font-size: 24px; font-weight: 500; letter-spacing: -.02em; margin: 0 0 8px; }
+  .not > p { color: var(--ink-2); margin: 0 0 18px; }
+  .not ul { list-style: none; padding: 0; margin: 0; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+  .not li { padding: 16px 20px; border-top: 1px solid var(--line); color: var(--ink-2); font-size: 14.5px; }
+  .not li:first-child { border-top: 0; }
+  .not li b { color: var(--ink); font-weight: 500; }
+  .upd { margin-top: 40px; color: var(--muted); font-size: 13.5px; }
+  .upd a { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
+  @media (max-width: 760px) {
+    .rm { padding: 110px 16px 70px; }
+    .rules { grid-template-columns: 1fr; }
+    .track { padding-left: 34px; }
+    .track::before { left: 11px; }
+    .phase .dot { left: -34px; width: 23px; height: 23px; font-size: 9px; top: 24px; }
+    .card { padding: 22px 18px; }
+    .ph-head h2 { font-size: 22px; }
+    .it { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body class="landing">
+<header class="nav solid">
+  <a class="brand" href="/" aria-label="COWL home"><img src="/assets/cowl-mark.svg" width="30" height="30" alt=""><span class="word">COWL</span></a>
+  <nav class="nav-links" aria-label="Main"><a href="/#how">How it works</a><a href="/transparency">Transparency</a><a href="/roadmap" aria-current="page">Roadmap</a><a href="/#faq">FAQ</a></nav>
+  <div class="nav-right">
+    <a class="icon-btn" href="https://x.com/cowlhq" target="_blank" rel="noopener" aria-label="COWL on X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.8 3h3.1l-6.8 7.8 8 10.2h-6.3l-4.9-6.4L5.3 21H2.2l7.3-8.3L1.8 3h6.4l4.4 5.9L17.8 3Zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5Z"/></svg></a>
+    <a class="icon-btn" href="https://t.me/cowlhq" target="_blank" rel="noopener" aria-label="COWL on Telegram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.4 4.6 18.3 19c-.2 1-.8 1.3-1.7.8l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.8 8.8-7.9c.4-.3-.1-.5-.6-.2L6.2 13 1.5 11.6c-1-.3-1-1 .2-1.5L20 3.2c.9-.3 1.6.2 1.4 1.4Z"/></svg></a>
+    <a class="icon-btn" data-social="github" href="https://github.com/cowlpro/cowl" target="_blank" rel="noopener" aria-label="COWL source on GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg></a>
+    <a class="btn small primary" href="/receive">Open app</a>
+  </div>
+</header>
+<main class="rm">
+  <span class="kicker">Roadmap</span>
+  <h1>Built in order. <em>Shipped when it's real.</em></h1>
+  <p class="lead">COWL does one thing: it lets you get paid without your wallet showing up on-chain. Everything below either makes that easier, or makes it work in more places. We work through it top to bottom. There are no dates on this page, on purpose.</p>
+
+  <div class="rules">
+    <div><b>Order, not dates</b><span>Each phase starts when the one before it is done. A date we might miss helps nobody.</span></div>
+    <div><b>Shipped means checkable</b><span>Nothing moves to Shipped until it is live on mainnet and you can try it or read it yourself.</span></div>
+    <div><b>Same rules for every feature</b><span>No custody, no pooling, keys stay in your browser. A feature that breaks that does not ship.</span></div>
+  </div>
+
+  <div class="track">
+    <section class="phase done">
+      <span class="dot">01</span>
+      <div class="card">
+        <div class="ph-head"><h2>The core</h2><span class="pill done">Shipped</span></div>
+        <p class="ph-intro">Private receive links on Robinhood Chain, working end to end and tested with real funds before launch.</p>
+        <div class="items">
+          <div class="it"><b>Private receive links</b><a href="/receive">Open</a><p>One free signature creates your keys. Every payment lands at a fresh one-time address only you can open.</p></div>
+          <div class="it"><b>Inbox and withdraw</b><a href="/inbox">Open</a><p>Your browser finds your payments with your viewing key and moves them with one click. The server never learns which are yours.</p></div>
+          <div class="it"><b>Short link through the ERC-6538 registry</b><a href="/receive">Open</a><p>Pay a wallet address directly and the money still lands at a fresh address. The short link does name your wallet to whoever you share it with.</p></div>
+          <div class="it"><b>ETH, $COWL and all 50 Robinhood stock tokens</b><a href="/send">Open</a><p>Plus any ERC-20 by address. Token payments carry a little ETH so the receiver can withdraw.</p></div>
+          <div class="it"><b>Verified Router with no owner and no fee</b><a data-router target="_blank" rel="noopener">Blockscout</a><p>About 80 lines. Holds nothing, can be upgraded by nobody.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="phase done">
+      <span class="dot">02</span>
+      <div class="card">
+        <div class="ph-head"><h2>Easier to get paid</h2><span class="pill done">Shipped</span></div>
+        <p class="ph-intro">The first round of tools built on the core, shipped in the days after launch.</p>
+        <div class="items">
+          <div class="it"><b>Payment requests</b><a href="/receive">Open</a><p>An amount, an asset and a note in one link, with a QR. The payer opens it and everything is filled in. The note never touches the chain.</p></div>
+          <div class="it"><b>Pay me privately button</b><a href="/receive">Open</a><p>HTML for your site, Markdown for your README, one line for your bio.</p></div>
+          <div class="it"><b>Open source</b><a href="https://github.com/cowlpro/cowl" target="_blank" rel="noopener">GitHub</a><p>The full code is public. The Router built from the repo matches the deployed one byte for byte.</p></div>
+          <div class="it"><b>Live $COWL section</b><a href="/#token">Open</a><p>Every trade read from the chain, from the Pons curve through to the Uniswap v4 pool.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="phase now">
+      <span class="dot">03</span>
+      <div class="card">
+        <div class="ph-head"><h2>COWL Names</h2><span class="pill now"><i></i>Building now</span></div>
+        <p class="ph-intro">The short link today is your wallet address. Names fix that: a short link that is easy to share and still keeps your wallet out of it.</p>
+        <div class="items">
+          <div class="it"><b>Claim a name like cowl.pro/maya</b><span class="tag">In development</span><p>It points to your receive keys, not your wallet, so payers learn nothing about what you hold.</p></div>
+          <div class="it"><b>For $COWL holders</b><span class="tag">In development</span><p>Claiming a name will require holding $COWL. Paying a name will not.</p></div>
+          <div class="it"><b>Plainly public</b><span class="tag">By design</span><p>Names are public records. Pick one that is not your real name if that matters to you.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="phase next">
+      <span class="dot">04</span>
+      <div class="card">
+        <div class="ph-head"><h2>Withdraw without ETH</h2><span class="pill next">Up next</span></div>
+        <p class="ph-intro">Today, moving a token payment out of its one-time address uses a little ETH the sender attached. A relayer removes that step.</p>
+        <div class="items">
+          <div class="it"><b>Relayer</b><span class="tag">After Names</span><p>Withdrawals that do not need ETH in the one-time address first. Same rule as the Router: it never holds your funds.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="phase">
+      <span class="dot">05</span>
+      <div class="card">
+        <div class="ph-head"><h2>For teams</h2><span class="pill">Planned</span></div>
+        <p class="ph-intro">Once single payments are effortless, the next step is paying many people, and proving it.</p>
+        <div class="items">
+          <div class="it"><b>Private payroll</b><span class="tag">Planned</span><p>Pay a list of COWL links or names in one transaction. Each person gets a fresh address. Needs a new contract, verified like the Router.</p></div>
+          <div class="it"><b>Payment receipts</b><span class="tag">Planned</span><p>A receipt for the sender, and a way for the receiver to prove a payment arrived without revealing their main wallet.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="phase explore">
+      <span class="dot">06</span>
+      <div class="card">
+        <div class="ph-head"><h2>Exploring</h2><span class="pill">Not committed</span></div>
+        <p class="ph-intro">Ideas we are weighing. They may change shape, or not happen at all.</p>
+        <div class="items">
+          <div class="it"><b>COWL on your home screen</b><span class="tag">Exploring</span><p>Install the app on your phone and scan a QR to pay.</p></div>
+          <div class="it"><b>Telegram requests</b><span class="tag">Exploring</span><p>Create a payment request from a chat. The bot would never hold a key.</p></div>
+          <div class="it"><b>Split withdrawals</b><span class="tag">Exploring</span><p>Withdraw in parts over time, so timing and amounts are harder to link.</p></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="not">
+    <h2>Not on the roadmap</h2>
+    <p>Things people ask for that we will not promise.</p>
+    <ul>
+      <li><b>Hidden amounts or senders.</b> Not without zero-knowledge proofs and an independent audit. Until then, they stay public and we say so.</li>
+      <li><b>Pools, mixing or custody.</b> Money goes straight to an address only the receiver controls. That does not change.</li>
+      <li><b>Yield, staking or rewards for holding $COWL.</b> The app works the same with or without the token.</li>
+    </ul>
+  </section>
+
+  <p class="upd">When something ships, it moves up this page and gets announced on <a href="https://x.com/cowlhq" target="_blank" rel="noopener">@cowlhq</a>. What stays public and what does not: <a href="/transparency">Transparency</a>.</p>
+</main>
+<footer class="foot"><p class="foot-note">COWL is open-source software, not a bank or broker. Unaudited; use at your own risk. This page describes plans, not promises of dates or outcomes.</p><div class="foot-word" aria-hidden="true">COWL</div></footer>
+<script type="module">
+  const c = await fetch('/config.json', { cache: 'no-store' }).then((r) => r.json());
+  document.querySelectorAll('[data-router]').forEach((a) => { if (c.router) a.href = `${c.explorer}/address/${c.router}?tab=contract`; });
+</script>
+</body>
+</html>

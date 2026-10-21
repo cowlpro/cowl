@@ -300,6 +300,55 @@ export function createVault(canvas, opts = {}) {
   root.add(vault);
   scene.add(root);
 
+  // ---------- wordmark raksasa di belakang brankas (pola hero: objek di depan huruf) ----------
+  // digambar di kanvas 2D lalu jadi bidang datar jauh di belakang; ikut paralaks kamera sehingga terasa berlapis
+  const wmCanvas = document.createElement('canvas'); wmCanvas.width = 2400; wmCanvas.height = 700;
+  const wmTex = new THREE.CanvasTexture(wmCanvas); wmTex.colorSpace = THREE.SRGBColorSpace; wmTex.anisotropy = 4;
+  function drawWordmark() {
+    const g = wmCanvas.getContext('2d'), W = wmCanvas.width, H = wmCanvas.height;
+    g.clearRect(0, 0, W, H);
+    g.font = `800 ${Math.round(H * 0.98)}px Geist, "Helvetica Neue", Arial, sans-serif`;
+    g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+    const text = opts.wordmark || 'COWL';
+    // rapatkan huruf seperti CSS letter-spacing -0.06em
+    const sp = -0.06 * H * 0.98;
+    const widths = [...text].map((ch) => g.measureText(ch).width);
+    const total = widths.reduce((a, b) => a + b, 0) + sp * (text.length - 1);
+    const scale = Math.min(1, (W * 0.995) / total);
+    g.save(); g.translate(W / 2, H * 0.86); g.scale(scale, scale);
+    const grad = g.createLinearGradient(0, -H * 0.8, 0, 0);
+    grad.addColorStop(0, '#62646f'); grad.addColorStop(0.45, '#2e2f36'); grad.addColorStop(1, '#141418');
+    g.fillStyle = grad; g.textAlign = 'left';
+    let x = -total / 2;
+    [...text].forEach((ch, i) => { g.fillText(ch, x, 0); x += widths[i] + sp; });
+    g.restore();
+    // tekstur garis halus (scanline) hanya di dalam huruf
+    g.globalCompositeOperation = 'source-atop';
+    for (let y = 0; y < H; y += 5) { g.fillStyle = 'rgba(0,0,0,0.42)'; g.fillRect(0, y, W, 2); }
+    const sheen = g.createLinearGradient(0, 0, W, 0);
+    sheen.addColorStop(0, 'rgba(255,255,255,0)'); sheen.addColorStop(0.5, 'rgba(160,180,255,0.06)'); sheen.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = sheen; g.fillRect(0, 0, W, H);
+    g.globalCompositeOperation = 'source-over';
+    wmTex.needsUpdate = true;
+  }
+  drawWordmark();
+  document.fonts?.ready.then(drawWordmark);
+  const wmMat = new THREE.MeshBasicMaterial({ map: wmTex, transparent: true, depthWrite: false, toneMapped: false, opacity: 0 });
+  const wordmark = new THREE.Mesh(new THREE.PlaneGeometry(1, wmCanvas.height / wmCanvas.width), wmMat);
+  wordmark.renderOrder = -1;
+  const WM_Z = -6;
+  wordmark.position.z = WM_Z;
+  scene.add(wordmark);
+  let wmTarget = 0;
+  function fitWordmark() {
+    const dist = camBase.z - WM_Z;
+    const visH = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * dist;
+    const visW = visH * camera.aspect;
+    wordmark.scale.setScalar(visW * 1.04);
+    // pusat huruf sedikit di atas tengah layar, puncak brankas menyembul di depannya
+    wordmark.position.y = 0.1 + visH * (camera.aspect < 0.8 ? 0.2 : 0.15);
+  }
+
   // ---------- pasca-proses: bloom halus ----------
   let composer = null;
   if (!lite) {
@@ -320,6 +369,7 @@ export function createVault(canvas, opts = {}) {
     renderer.setSize(w, h, false);
     composer?.setSize(w, h);
     camera.aspect = w / h; camera.updateProjectionMatrix();
+    fitWordmark();
   }
 
   function step(dt) {
@@ -390,6 +440,8 @@ export function createVault(canvas, opts = {}) {
     [core, cage, rings, glow].forEach((o) => (o.visible = vis));
     coreLight.intensity *= fade;
     dust.material.opacity = 0.5 * p.opacity;
+    wmMat.opacity += (wmTarget - wmMat.opacity) * (1 - Math.pow(0.02, dt));
+    wordmark.visible = wmMat.opacity > 0.01;
     points.visible = p.dissolve > 0.01 && p.opacity > 0.01;
     pmat.uniforms.uT.value = t; pmat.uniforms.uMix.value = p.dissolve; pmat.uniforms.uMine.value = p.mine;
 
@@ -415,6 +467,7 @@ export function createVault(canvas, opts = {}) {
     start, stop, step, resize, screenToWorld,
     setPointer(nx, ny) { state.mx = nx; state.my = ny; },
     setPose(p, instant = false) { Object.assign(target, p); if (instant) Object.assign(state.pose, p); },
+    setWordmark(o) { wmTarget = Math.max(0, Math.min(1, o)); },
     get running() { return running; },
   };
 }

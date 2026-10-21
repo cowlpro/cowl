@@ -165,6 +165,8 @@ function onScroll() {
   pose.spin = spin;
   if (lifting && inStory && act === 1) pose.opacity = 0.15;
   hood.setPose(pose);
+  // wordmark raksasa hanya di hero; memudar cepat begitu mulai digulir
+  hood.setWordmark?.(r.top > 0 ? clamp(1 - ease(clamp(1 - r.top / vh)) * 1.8) : 0);
 }
 // ---------------------------------------------------------------- HOLD: lihat seperti pengirim
 function bindHold() {

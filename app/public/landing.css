@@ -47,13 +47,13 @@ body.landing { background: #000; }
 .vtext.left { left: 14px; transform: translateY(-50%) rotate(180deg); }
 .vtext.right { right: 14px; }
 
-.hero-copy { position: absolute; left: 48px; bottom: 124px; width: clamp(290px, calc(50vw - min(93vh, 1000px) * .375 - 76px), 420px); z-index: 3; }
+.hero-copy { position: absolute; left: 48px; bottom: 124px; width: clamp(300px, calc(50vw - min(93vh, 1000px) * .375 - 56px), 470px); z-index: 3; }
 .hero::after { /* gelapkan sisi kiri & kanan supaya teks terbaca di atas wordmark */
   content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
   background: linear-gradient(90deg, #000d 0%, #0000 26%, #0000 74%, #000d 100%), linear-gradient(0deg, #000 0%, #0000 34%);
 }
 .hero-copy .kicker { display: inline-flex; align-items: center; gap: 10px; }
-.hero-copy h1 { font-size: clamp(28px, 2.5vw, 40px); line-height: 1.06; letter-spacing: -.035em; font-weight: 600; margin: 16px 0 16px; }
+.hero-copy h1 { font-size: clamp(30px, 3.1vw, 50px); line-height: 1.02; letter-spacing: -.04em; font-weight: 600; margin: 18px 0 18px; }
 .hero-copy h1 span { color: var(--muted); }
 .hero-copy p { color: var(--ink-2); font-size: 15.5px; margin: 0 0 26px; max-width: 380px; }
 .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }

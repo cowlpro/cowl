@@ -209,6 +209,34 @@ function initScene() {
   window.__hood = hood; // untuk tes headless
 }
 
+// ---------------------------------------------------------------- showcase produk
+// tab berganti otomatis tiap 5,5 dtk saat terlihat; berhenti saat kursor di atasnya; klik untuk memilih
+function initShowcase() {
+  const wrap = $('.show-wrap');
+  if (!wrap) return;
+  const tabs = $$('[role=tab]', wrap), imgs = $$('.show-stage img', wrap), url = $('[data-show-url]', wrap), stage = $('.show-stage', wrap);
+  // tinggi bingkai mengikuti layar yang sedang tampil (pakai ukuran asli gambar, bukan saat sudah termuat)
+  const fit = () => { const im = imgs[i]; const pad = im.offsetTop; stage.style.height = Math.round(im.offsetWidth * (+im.getAttribute('height') / +im.getAttribute('width')) + pad * 2) + 'px'; };
+  addEventListener('resize', fit, { passive: true });
+  let i = 0, timer = null, visible = false, hover = false;
+  const DUR = 5500;
+  const set = (n) => {
+    i = (n + tabs.length) % tabs.length;
+    tabs.forEach((t, k) => { t.setAttribute('aria-selected', String(k === i)); t.classList.remove('run'); });
+    imgs.forEach((im, k) => im.classList.toggle('on', k === i));
+    url.textContent = tabs[i].dataset.url;
+    fit();
+    void tabs[i].offsetWidth; // mulai ulang animasi bilah
+    if (visible && !hover && !reduced) tabs[i].classList.add('run');
+  };
+  const loop = () => { clearTimeout(timer); if (visible && !hover && !reduced) timer = setTimeout(() => { set(i + 1); loop(); }, DUR); };
+  tabs.forEach((t, k) => t.addEventListener('click', () => { set(k); loop(); }));
+  wrap.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { hover = true; tabs[i].classList.remove('run'); clearTimeout(timer); } });
+  wrap.addEventListener('pointerleave', () => { hover = false; set(i); loop(); });
+  imgs.forEach((im) => { im.loading = 'eager'; });
+  if ('IntersectionObserver' in window) new IntersectionObserver((en) => { visible = en[0].isIntersecting; set(i); loop(); }, { threshold: 0.35 }).observe(wrap);
+}
+
 // ---------------------------------------------------------------- lain-lain
 function renderAssets() {
   const box = $('#asset-chips');
@@ -222,7 +250,7 @@ function bindCopy() {
   }));
 }
 function revealOnScroll() {
-  const els = $$('.sec-head, .how-grid article, .tools-grid article, .pf, .verify-self, .tk-note, .ledger-col, .contracts, .faq-list, .final h2, .final p, .assets');
+  const els = $$('.sec-head, .builton, .show-wrap, .rmt-grid, .how-grid article, .tools-grid article, .pf, .verify-self, .tk-note, .ledger-col, .contracts, .faq-list, .final h2, .final p, .assets');
   els.forEach((e) => e.classList.add('rv'));
   if (reduced || !('IntersectionObserver' in window)) { els.forEach((e) => e.classList.add('in')); return; }
   const io = new IntersectionObserver((ents) => ents.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }), { rootMargin: '0px 0px -10% 0px' });
@@ -290,6 +318,7 @@ async function main() {
   applyLive();
   fillContracts();
   initToken(CFG);
+  initShowcase();
   bindCopy();
   renderAssets();
   initScene();

@@ -59,7 +59,7 @@
   <div class="vtext right" aria-hidden="true">Chain 4663 · Non-custodial</div>
 
   <div class="hero-copy">
-    <span class="kicker"><span class="dot-live"></span> Live on Robinhood Chain</span>
+    <a class="hero-ann" href="/roadmap"><span class="dot-live"></span><b>Live on Uniswap v4</b><i aria-hidden="true"></i><span>Names in development</span><span class="arrow" aria-hidden="true">→</span></a>
     <h1>Your wallet is a public statement. <em>Put a hood on it.</em></h1>
     <p>COWL gives you a private receive link. Every payment lands in a fresh address that only you can open. No pool, no custody, no mixer.</p>
     <div class="hero-actions">
@@ -130,6 +130,42 @@
         <span>0x3f08…a2e4</span><span>0xc9e1…7731</span><span>0x18d5…9fb0</span><span class="me">0xe0a7…4c16</span>
       </div>
       <div class="st-sender mono"><span class="kicker">What the sender sees</span><b>Paid → 0x7f3e…b91a</b><span>Owner: unknown · first seen just now</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ BUILT ON ============================ -->
+<section class="builton" aria-label="Built on">
+  <span class="kicker">Built on open standards</span>
+  <ul>
+    <li><b>ERC-5564</b><small>Stealth addresses</small></li>
+    <li><b>ERC-6538</b><small>Key registry</small></li>
+    <li><b>Robinhood Chain</b><small>Arbitrum Orbit · 4663</small></li>
+    <li><b>Uniswap v4</b><small>$COWL liquidity, locked</small></li>
+    <li><b>Blockscout</b><small>Router source verified</small></li>
+    <li><b>MIT</b><small>Open source on GitHub</small></li>
+  </ul>
+</section>
+
+<!-- ============================ PRODUCT ============================ -->
+<section class="show" id="product">
+  <div class="sec-head"><span class="kicker">The product</span><h2>Four screens. <em>That's the whole app.</em></h2>
+    <p>Real screens from cowl.pro, not mockups. Open it and you will see exactly this.</p></div>
+  <div class="show-wrap">
+    <div class="show-tabs" role="tablist" aria-label="COWL screens">
+      <button type="button" role="tab" aria-selected="true" data-i="0" data-url="cowl.pro/receive"><span class="mono">01</span><b>Receive</b><small>One free signature gives you a private link.</small><i class="show-bar"><i></i></i></button>
+      <button type="button" role="tab" aria-selected="false" data-i="1" data-url="cowl.pro/receive"><span class="mono">02</span><b>Request</b><small>An amount, an asset and a note in one link.</small><i class="show-bar"><i></i></i></button>
+      <button type="button" role="tab" aria-selected="false" data-i="2" data-url="cowl.pro/pay"><span class="mono">03</span><b>Pay</b><small>The payer sees a fresh address, never your wallet.</small><i class="show-bar"><i></i></i></button>
+      <button type="button" role="tab" aria-selected="false" data-i="3" data-url="cowl.pro/receive"><span class="mono">04</span><b>Share</b><small>A Pay me privately button for any site or bio.</small><i class="show-bar"><i></i></i></button>
+    </div>
+    <div class="show-frame">
+      <div class="show-chrome"><i></i><i></i><i></i><span class="show-url mono"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-show-url>cowl.pro/receive</span></span></div>
+      <div class="show-stage">
+        <img class="on" src="/assets/show/receive.webp?v=__V__" alt="COWL Receive: your private receive link" width="1296" height="722" loading="lazy">
+        <img src="/assets/show/request.webp?v=__V__" alt="COWL payment request with amount, asset and note" width="1296" height="1126" loading="lazy">
+        <img src="/assets/show/pay.webp?v=__V__" alt="What the payer sees: the request prefilled" width="1296" height="1090" loading="lazy">
+        <img src="/assets/show/button.webp?v=__V__" alt="The Pay me privately button" width="1296" height="690" loading="lazy">
       </div>
     </div>
   </div>
@@ -307,6 +343,21 @@
     <div><span class="kicker">COWL Router</span><a class="mono" data-addr="router" target="_blank" rel="noopener">Deploying…</a><small>No owner · no fee · holds nothing</small></div>
     <div><span class="kicker">Audit</span><b>Not yet</b><small>Source verified and <a data-social="github" href="https://github.com/cowlpro/cowl" target="_blank" rel="noopener">open on GitHub</a>.</small></div>
   </div>
+</section>
+
+<!-- ============================ ROADMAP ============================ -->
+<section class="rmt" id="roadmap">
+  <div class="sec-head"><span class="kicker">Roadmap</span><h2>Built in order. <em>No dates.</em></h2>
+    <p>We work top to bottom and move things to Shipped only when you can try them on mainnet.</p></div>
+  <div class="rmt-grid">
+    <a class="rmt-col done" href="/roadmap"><span class="rmt-pill">Shipped</span>
+      <ul><li>Private receive links and Inbox</li><li>ETH and 50 stock tokens</li><li>Payment requests</li><li>Pay me privately button</li><li>Open source, verified Router</li></ul></a>
+    <a class="rmt-col now" href="/roadmap"><span class="rmt-pill"><i></i>Building now</span>
+      <ul><li><b>COWL Names</b></li><li>cowl.pro/yourname that points to your keys, not your wallet</li><li>Claiming requires holding $COWL</li></ul></a>
+    <a class="rmt-col next" href="/roadmap"><span class="rmt-pill">Up next</span>
+      <ul><li><b>Relayer</b>: withdraw without ETH</li><li>Then for teams: private payroll and payment receipts</li></ul></a>
+  </div>
+  <div class="rmt-cta"><a class="btn" href="/roadmap">See the full roadmap <span class="arrow">→</span></a></div>
 </section>
 
 <!-- ============================ FAQ ============================ -->

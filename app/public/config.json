@@ -47,6 +47,12 @@
       "0x102bef32324e6c1cf8054af59404fc03e2dcb8dd13b489307488829f40f573b8",
       "0x138838ce6f7b41f724e2b42b51167d0ce13c7089c1dafb8361063a0bf5cc299e"
     ],
-    "devBurned": 19586101.93
+    "devBurned": 19586101.93,
+    "pool": {
+      "manager": "0x8366a39CC670B4001A1121B8F6A443A643e40951",
+      "id": "0x678022324caa1e7c37a80fe3aedb91b0ccd194ddf7072d01b0050874517f0c25",
+      "fromBlock": 94120000,
+      "venue": "Uniswap v4"
+    }
   }
 }

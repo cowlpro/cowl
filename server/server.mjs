@@ -130,7 +130,16 @@ const TOK = cfg.token || null;
 const TOK_FILE = path.join(DATA, 'token.json');
 const BUY_TOPIC = '0xec36bf571f136799e8dc0b0b8bea4b04d8bd3d43de838aab0d5fc21d4cbfc455';
 const SELL_TOPIC = '0x8113d738abdcb6b38357e9d53a54a7157861a09031b453651f0fe7fe151f59df';
-let tok = { lastBlock: TOK ? TOK.launchBlock - 50 : 0, trades: [] };
+let tok = { lastBlock: TOK ? TOK.launchBlock - 50 : 0, poolLast: 0, trades: [] };
+// sesudah graduasi: likuiditas pindah ke pool Uniswap v4 (PoolManager, event Swap dengan id pool)
+const POOL = TOK && TOK.pool ? TOK.pool : null;
+const SWAP_TOPIC = '0x40e9cecb9f5f1f1c5b9c97dec2917b7ee92e57ba5563708daca94dd84ad7112f';
+const Q96 = 2n ** 96n;
+const int128 = (w) => { const v = BigInt('0x' + w); return v >= 2n ** 255n ? v - 2n ** 256n : v; };
+// currency0 = ETH (alamat 0), currency1 = COWL → harga COWL dalam ETH = 1 / (sqrtP/2^96)^2
+const priceFromSqrt = (sq) => { const r = Number(sq) / Number(Q96); return r > 0 ? 1 / (r * r) : null; };
+let poolPrice = null;
+let dexInfo = { liquidityUsd: null, at: 0 };
 let tokLive = { reserves: null, supply: null, trackedQuote: null, graduated: false, ethUsd: null, at: 0 };
 let tokSyncing = false;
 const big = (h) => BigInt(h);
@@ -171,6 +180,36 @@ async function syncToken() {
       tok.lastBlock = to;
       if (logs.length || to === top) await saveTok();
     }
+    // pool Uniswap v4 (setelah graduasi)
+    if (POOL) {
+      if (!tok.poolLast) tok.poolLast = POOL.fromBlock - 1;
+      while (tok.poolLast < top) {
+        const from = tok.poolLast + 1, to = Math.min(top, from + CHUNK - 1);
+        const logs = await rpc('eth_getLogs', [{ address: POOL.manager, topics: [SWAP_TOPIC, POOL.id], fromBlock: '0x' + from.toString(16), toBlock: '0x' + to.toString(16) }]);
+        for (const l of logs) {
+          const w = l.data.slice(2).match(/.{64}/g);
+          const a0 = int128(w[0]), a1 = int128(w[1]);
+          const sq = BigInt('0x' + w[2]);
+          if (a1 === 0n) continue;
+          const bn = Number(l.blockNumber);
+          const t = l.blockTimestamp ? Number(l.blockTimestamp) : await blockTime(bn);
+          const p = priceFromSqrt(sq);
+          poolPrice = p;
+          // delta milik penukar: ETH keluar dari penukar (a0 < 0) = beli COWL
+          tok.trades.push({ t, b: bn, x: l.transactionHash, s: a0 < 0n ? 1 : 0, w: '0x' + l.topics[2].slice(26), q: toNum(a0 < 0n ? -a0 : a0), k: toNum(a1 < 0n ? -a1 : a1), p, v: 4 });
+        }
+        tok.poolLast = to;
+        if (logs.length || to === top) await saveTok();
+      }
+      if (poolPrice == null) { const last = [...tok.trades].reverse().find((t) => t.v === 4); if (last) poolPrice = last.p; }
+      if (Date.now() - dexInfo.at > 120000) {
+        try {
+          const j = await (await fetch(`https://api.dexscreener.com/latest/dex/pairs/robinhood/${POOL.id}`, { signal: AbortSignal.timeout(8000) })).json();
+          const pr = (j.pairs || [])[0];
+          dexInfo = { liquidityUsd: pr?.liquidity?.usd ?? dexInfo.liquidityUsd, at: Date.now() };
+        } catch { dexInfo.at = Date.now(); }
+      }
+    }
     const [res, sup, tq, grad] = await Promise.all([
       ethCall(TOK.curve, '0x0902f1ac'), ethCall(TOK.ca, '0x18160ddd'), ethCall(TOK.curve, '0xca52b0b7').catch(() => null), ethCall(TOK.curve, '0xe7c2b772').catch(() => null),
     ]);
@@ -186,7 +225,8 @@ async function syncToken() {
 }
 function tokenPayload() {
   const [qr, tr] = tokLive.reserves || [0, 0];
-  const priceEth = tr ? qr / tr : null;
+  // sebelum graduasi: harga dari cadangan kurva; sesudahnya: dari swap terakhir di pool v4
+  const priceEth = tokLive.graduated ? poolPrice : tr ? qr / tr : null;
   const supply = tokLive.supply;
   const usd = tokLive.ethUsd;
   const day = Date.now() / 1000 - 86400;
@@ -196,7 +236,8 @@ function tokenPayload() {
     mcEth: priceEth && supply ? priceEth * supply : null, mcUsd: priceEth && supply && usd ? priceEth * supply * usd : null,
     supply, launchSupply: TOK.launchSupply, burned: supply ? TOK.launchSupply - supply : null,
     trackedQuote: tokLive.trackedQuote, graduationEth: TOK.graduationEth, graduated: tokLive.graduated,
-    progress: tokLive.trackedQuote != null ? Math.min(1, tokLive.trackedQuote / TOK.graduationEth) : null,
+    progress: tokLive.graduated ? 1 : tokLive.trackedQuote != null ? Math.min(1, tokLive.trackedQuote / TOK.graduationEth) : null,
+    venue: tokLive.graduated ? (POOL?.venue || 'Uniswap v4') : 'Pons curve', liquidityUsd: tokLive.graduated ? dexInfo.liquidityUsd : null,
     trades: tok.trades.length, buys: tok.trades.filter((t) => t.s).length, sells: tok.trades.filter((t) => !t.s).length,
     vol24Eth: d24.reduce((a, t) => a + t.q, 0), trades24: d24.length,
     // seri harga ringkas: [waktu, harga ETH, sisi, ETH]

@@ -70,9 +70,16 @@ function render() {
   set('buys', fmtNum(d.buys));
   set('sells', fmtNum(d.sells));
   set('supply', fmtNum(d.supply));
-  set('progressPct', d.progress != null ? (d.progress * 100).toFixed(1) + '%' : '—');
-  set('progressEth', d.trackedQuote != null ? `${d.trackedQuote.toFixed(2)} / ${d.graduationEth} ETH` : '—');
-  set('status', d.graduated ? 'Graduated to Uniswap v4' : 'Trading on the Pons bonding curve');
+  if (d.graduated) {
+    set('progressPct', 'Completed');
+    set('progressEth', `${d.graduationEth} ETH · now on ${d.venue}`);
+    set('progressNote', `The curve reached ${d.graduationEth} ETH and liquidity moved to ${d.venue}, where it is locked. The chart continues from the pool.`);
+    set('mcEth', (d.mcEth ? fmtEth(d.mcEth) + ' ETH' : '—') + (d.liquidityUsd ? ' · liquidity ' + fmtUsd(d.liquidityUsd) : ''));
+  } else {
+    set('progressPct', d.progress != null ? (d.progress * 100).toFixed(1) + '%' : '—');
+    set('progressEth', d.trackedQuote != null ? `${d.trackedQuote.toFixed(2)} / ${d.graduationEth} ETH` : '—');
+  }
+  set('status', d.graduated ? `Graduated · trading on ${d.venue}` : 'Trading on the Pons bonding curve');
   const bar = $('[data-tk="bar"]');
   if (bar && d.progress != null) bar.style.setProperty('--p', d.progress);
   const list = $('[data-tk="recent"]');

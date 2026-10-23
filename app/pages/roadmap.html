@@ -26,7 +26,7 @@
   .rules b { display: block; font-weight: 500; font-size: 15px; margin-bottom: 6px; }
   .rules span { color: var(--muted); font-size: 13.5px; line-height: 1.5; }
   .track { position: relative; padding-left: 46px; }
-  .track::before { content: ''; position: absolute; left: 15px; top: 8px; bottom: 8px; width: 1px; background: linear-gradient(180deg, var(--good) 0%, var(--good) 34%, var(--warn) 42%, #4a8dff 58%, var(--line-2) 74%); }
+  .track::before { content: ''; position: absolute; left: 15px; top: 8px; bottom: 8px; width: 1px; background: linear-gradient(180deg, var(--good) 0%, var(--good) 50%, var(--warn) 58%, var(--line-2) 76%); }
   .phase { position: relative; margin-bottom: 26px; }
   .phase .dot { position: absolute; left: -46px; top: 22px; width: 31px; height: 31px; border-radius: 50%; display: grid; place-items: center; font: 500 11px var(--mono); background: #000; border: 1px solid var(--line-2); color: var(--muted); }
   .phase.done .dot { border-color: #7ee0b066; color: var(--good); }
@@ -123,26 +123,26 @@
       </div>
     </section>
 
-    <section class="phase now">
+    <section class="phase done">
       <span class="dot">03</span>
       <div class="card">
-        <div class="ph-head"><h2>COWL Names</h2><span class="pill now"><i></i>Building now</span></div>
-        <p class="ph-intro">The short link today is your wallet address. Names fix that: a short link that is easy to share and still keeps your wallet out of it.</p>
+        <div class="ph-head"><h2>COWL Names</h2><span class="pill done">Shipped</span></div>
+        <p class="ph-intro">The 0x short link is your wallet address. Names fix that: a short link that is easy to share and still keeps your wallet out of it.</p>
         <div class="items">
-          <div class="it"><b>Claim a name like cowl.pro/maya</b><span class="tag">In development</span><p>It points to your receive keys, not your wallet, so payers learn nothing about what you hold.</p></div>
-          <div class="it"><b>For $COWL holders</b><span class="tag">In development</span><p>Claiming a name will require holding $COWL. Paying a name will not.</p></div>
-          <div class="it"><b>Plainly public</b><span class="tag">By design</span><p>Names are public records. Pick one that is not your real name if that matters to you.</p></div>
+          <div class="it"><b>Claim a name like cowl.pro/maya</b><a href="/receive">Claim</a><p>It points to your receive keys, not your wallet, so payers learn nothing about what you hold. Payment requests and the Pay me privately button use it too.</p></div>
+          <div class="it"><b>For $COWL holders</b><span class="tag">Live</span><p>Claiming needs 100,000 $COWL in the claiming wallet, checked once at claim. One name per wallet. Paying a name needs nothing.</p></div>
+          <div class="it"><b>Plainly public</b><span class="tag">By design</span><p>Names are public records. The claiming wallet is not published: the server keeps only a salted hash so that wallet can change or release its name.</p></div>
         </div>
       </div>
     </section>
 
-    <section class="phase next">
+    <section class="phase now">
       <span class="dot">04</span>
       <div class="card">
-        <div class="ph-head"><h2>Withdraw without ETH</h2><span class="pill next">Up next</span></div>
+        <div class="ph-head"><h2>Withdraw without ETH</h2><span class="pill now"><i></i>Building now</span></div>
         <p class="ph-intro">Today, moving a token payment out of its one-time address uses a little ETH the sender attached. A relayer removes that step.</p>
         <div class="items">
-          <div class="it"><b>Relayer</b><span class="tag">After Names</span><p>Withdrawals that do not need ETH in the one-time address first. Same rule as the Router: it never holds your funds.</p></div>
+          <div class="it"><b>Relayer</b><span class="tag">In development</span><p>Withdrawals that do not need ETH in the one-time address first. Same rule as the Router: it never holds your funds.</p></div>
         </div>
       </div>
     </section>

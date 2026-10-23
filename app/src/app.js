@@ -24,6 +24,8 @@ const S = {
   send: { to: '', meta: null, resolved: '', asset: ETH, amount: '', busy: false, step: 0, result: null, req: null },
   request: { amount: '', asset: ETH, memo: '' }, // pembuat link tagihan di Receive
   badge: 'dark',
+  myName: null, // nama COWL milik kunci yang sedang terbuka
+  nm: { input: '', status: null, busy: false, holding: null },
   inbox: { since: 0, scanned: 0, mine: new Map(), syncing: false, total: 0, err: '' },
 };
 
@@ -31,8 +33,10 @@ const S = {
 function routeFromPath() {
   const p = location.pathname;
   const m = p.match(/^\/pay\/([^/]+)/);
-  if (m) {
-    S.view = 'send'; S.send.to = decodeURIComponent(m[1]);
+  const nmPath = p.match(/^\/([a-z0-9-]{3,20})\/?$/);
+  const target = m ? decodeURIComponent(m[1]) : nmPath && !['receive', 'send', 'inbox', 'app'].includes(nmPath[1]) ? nmPath[1] : null;
+  if (target) {
+    S.view = 'send'; S.send.to = target;
     const q = new URLSearchParams(location.search);
     const amount = (q.get('amount') || '').replace(',', '.');
     const memo = (q.get('memo') || '').slice(0, MEMO_MAX);
@@ -114,6 +118,7 @@ async function unlock() {
   const sig = await S.wallet.provider.request({ method: 'personal_sign', params: [msg, S.account] });
   S.keys = keysFromSignature(sig);
   await refreshRegistry();
+  await fetchMyName();
   render();
 }
 async function refreshRegistry() {
@@ -122,6 +127,110 @@ async function refreshRegistry() {
   S.registered = stored && stored !== ZERO_META ? stored.toLowerCase() : '';
   S.keyMismatch = !!(S.registered && S.keys && S.registered !== S.keys.metaBytes.toLowerCase());
 }
+// ===================================================================== COWL Names
+const NM = () => CFG.names || { minHold: 100000, minLen: 3, maxLen: 20 };
+const NAME_RE = /^[a-z0-9](?:[a-z0-9-]{1,18})[a-z0-9]$/;
+async function fetchMyName() {
+  try {
+    const r = await fetch('/api/names?meta=' + encodeURIComponent(S.keys.metaAddress.toLowerCase()), { cache: 'no-store' });
+    const j = await r.json();
+    S.myName = j.names?.[0] || null;
+  } catch { S.myName = null; }
+}
+async function nameHolding() {
+  if (!LIVE.ca || !S.account) return null;
+  try { return await new ethers.Contract(LIVE.ca, ABI.erc20, readProvider()).balanceOf(S.account); } catch { return null; }
+}
+const claimMessage = (b) => ['COWL Names · Claim', '', `Name: cowl.pro/${b.name}`, `Points to: ${b.meta}`, `Wallet: ${b.address}`, `Issued: ${b.issued}`, '', 'Signing is free. It sends nothing and moves nothing.'].join('\n');
+const releaseMessage = (b) => ['COWL Names · Release', '', `Name: cowl.pro/${b.name}`, `Wallet: ${b.address}`, `Issued: ${b.issued}`, '', 'Signing is free. It sends nothing and moves nothing.'].join('\n');
+async function signedPost(url, body, msgFn) {
+  const msg = msgFn(body);
+  body.signature = await S.wallet.provider.request({ method: 'personal_sign', params: [ethers.hexlify(ethers.toUtf8Bytes(msg)), S.account] });
+  const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || 'Request failed');
+  return j;
+}
+async function claimName() {
+  const name = S.nm.input;
+  const out = await signedPost('/api/names/claim', { name, meta: S.keys.metaAddress.toLowerCase(), address: S.account, issued: new Date().toISOString() }, claimMessage);
+  S.myName = out.name; S.nm = { input: '', status: null, busy: false, holding: S.nm.holding };
+  toast(`cowl.pro/${out.name} is yours`);
+  render();
+}
+async function releaseName() {
+  if (!S.myName || !confirm(`Release cowl.pro/${S.myName}? Anyone holding $COWL could claim it after.`)) return;
+  await signedPost('/api/names/release', { name: S.myName, address: S.account, issued: new Date().toISOString() }, releaseMessage);
+  toast(`cowl.pro/${S.myName} released`);
+  S.myName = null; render();
+}
+let nameTimer;
+async function checkName() {
+  const n = S.nm.input;
+  const set = (status) => { S.nm.status = status; paintNameStatus(); };
+  if (!n) return set(null);
+  if (!NAME_RE.test(n) || n.includes('--')) return set({ ok: false, text: `Use ${NM().minLen}–${NM().maxLen} lowercase letters, numbers or hyphens.` });
+  set({ ok: null, text: 'Checking…' });
+  try {
+    const r = await fetch('/api/names/' + encodeURIComponent(n), { cache: 'no-store' });
+    const j = await r.json();
+    if (n !== S.nm.input) return;
+    if (r.ok) set({ ok: false, text: `cowl.pro/${n} is taken.` });
+    else set(j.available ? { ok: true, text: `cowl.pro/${n} is available.` } : { ok: false, text: j.reason || 'Not available.' });
+  } catch { set({ ok: false, text: 'Could not check right now.' }); }
+}
+function paintNameStatus() {
+  const el = $('#nm-status'), btn = $('#nm-claim');
+  if (!el) return;
+  const st = S.nm.status;
+  el.className = 'note ' + (st ? (st.ok ? 'ok' : st.ok === false ? 'warn' : '') : '');
+  el.textContent = st ? st.text : '';
+  const need = BigInt(NM().minHold) * 10n ** 18n;
+  const enough = S.nm.holding != null && S.nm.holding >= need;
+  if (btn) btn.disabled = !(st && st.ok && enough) || S.nm.busy;
+}
+function bindNames() {
+  const inp = $('#nm-input');
+  if (!inp) return;
+  inp.addEventListener('input', () => { inp.value = inp.value.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, NM().maxLen); S.nm.input = inp.value; clearTimeout(nameTimer); nameTimer = setTimeout(checkName, 300); });
+  if (S.nm.holding == null) nameHolding().then((b) => { S.nm.holding = b; const h = $('#nm-hold'); if (h) h.innerHTML = holdLine(); paintNameStatus(); });
+  paintNameStatus();
+}
+function holdLine() {
+  const min = Number(NM().minHold).toLocaleString('en-US');
+  if (S.nm.holding == null) return `Claiming needs ${min} $COWL in this wallet · checking your balance…`;
+  const have = Number(ethers.formatUnits(S.nm.holding, 18));
+  const ok = S.nm.holding >= BigInt(NM().minHold) * 10n ** 18n;
+  return `This wallet holds <b class="${ok ? 'ok' : 'warn'}">${have.toLocaleString('en-US', { maximumFractionDigits: 0 })} $COWL</b> · claiming needs ${min}`;
+}
+function namesCard() {
+  if (S.myName) {
+    return `
+  <div class="card" id="nm-card">
+    <span class="kicker">COWL Names</span>
+    <h2 class="h2">Your name is live.</h2>
+    <p class="lead">Anyone can pay this name. It points to your receive keys, never to your wallet.</p>
+    <div class="link-box"><span class="url">cowl.pro/${esc(S.myName)}</span><button class="btn small primary" data-act="copy-name">Copy</button></div>
+    <div class="link-actions"><button class="btn small" data-act="release-name">Release name</button></div>
+    <p class="note">Your receive link, payment requests and Pay me privately button now use this name.</p>
+  </div>`;
+  }
+  return `
+  <div class="card" id="nm-card">
+    <span class="kicker">COWL Names · for $COWL holders</span>
+    <h2 class="h2">Claim a short name.</h2>
+    <p class="lead">cowl.pro/yourname points to your receive keys, not your wallet. Payers never learn which wallet it is.</p>
+    <div class="field">
+      <label for="nm-input">Name</label>
+      <div class="nm-field"><span>cowl.pro/</span><input class="input" id="nm-input" placeholder="yourname" value="${esc(S.nm.input)}" autocomplete="off" spellcheck="false" maxlength="${NM().maxLen}"></div>
+      <div class="note" id="nm-status"></div>
+    </div>
+    <p class="note" id="nm-hold">${holdLine()}</p>
+    <button class="btn primary block" id="nm-claim" data-act="claim-name" disabled>Claim name · free signature <span class="arrow">→</span></button>
+    <p class="note">Names are public, so pick one that is not your real name if that matters. COWL's server keeps a salted hash of the claiming wallet so only that wallet can change or release the name; it is never published. Holding is checked once, when you claim. One name per wallet.</p>
+  </div>`;
+}
+
 async function register() {
   const s = await signer();
   const reg = new ethers.Contract(CFG.registry, ABI.registry, s);
@@ -133,6 +242,7 @@ async function register() {
   render();
 }
 function receiveLink() {
+  if (S.myName) return `${location.origin}/${S.myName}`;
   const tail = S.registered && !S.keyMismatch ? S.account : S.keys.metaAddress;
   return `${location.origin}/pay/${tail}`;
 }
@@ -235,6 +345,7 @@ function viewReceive() {
       <p class="note">Publishes your public receive keys so anyone can pay <span class="mono">${short(S.account)}</span> privately. Incoming payments stay unlinkable on-chain, but the short link itself shows your wallet address to whoever you give it to. Share the long link if that matters.</p>` : ''}
     <details class="meta"><summary>Stealth meta-address</summary><div class="meta-text">${esc(S.keys.metaAddress)}</div></details>
   </div>
+  ${namesCard()}
   ${requestCard()}
   ${badgeCard()}`;
 }
@@ -324,7 +435,7 @@ function viewSend() {
     <form id="send-form" autocomplete="off">
       <div class="field">
         <label for="to">Recipient</label>
-        <input class="input mono" id="to" placeholder="cowl.pro/pay/0x… or 0x…" value="${esc(s.to)}" spellcheck="false">
+        <input class="input mono" id="to" placeholder="cowl.pro/name, cowl.pro/pay/… or 0x…" value="${esc(s.to)}" spellcheck="false">
         <div class="resolve" id="resolve">${s.resolved}</div>
       </div>
       <div class="field">
@@ -391,6 +502,7 @@ function bindPane() {
   pane.querySelectorAll('[data-nav]').forEach((el) => el.addEventListener('click', (e) => { e.preventDefault(); go(el.dataset.nav); }));
   if (S.view === 'send' && !S.send.result) bindSend();
   if (S.view === 'receive' && $('#req-card')) bindRequest();
+  if (S.view === 'receive' && $('#nm-input')) bindNames();
   if (S.view === 'inbox' && S.keys) syncInbox();
 }
 
@@ -405,6 +517,9 @@ async function onAct(e) {
     if (act === 'qr') return toggleQr('#qr', receiveLink());
     if (act === 'register') { btn.disabled = true; btn.textContent = 'Confirm in wallet…'; await register(); return; }
     if (act === 'asset') return openAssetModal();
+    if (act === 'claim-name') { btn.disabled = true; btn.textContent = 'Check your wallet…'; S.nm.busy = true; try { await claimName(); } finally { S.nm.busy = false; } return; }
+    if (act === 'release-name') return releaseName();
+    if (act === 'copy-name') return copy(receiveLink(), 'Name link copied');
     if (act === 'req-asset') return openAssetModal((a) => { S.request.asset = a; render(); });
     if (act === 'copy-req') return copy(requestLink(), 'Request link copied');
     if (act === 'share-req') return navigator.share({ title: 'Payment request · COWL', url: requestLink() }).catch(() => {});
@@ -456,6 +571,19 @@ async function resolveRecipient() {
   if (!raw) return setResolve('');
   const m = raw.match(/\/pay\/([^/?#\s]+)/);
   if (m) raw = decodeURIComponent(m[1]);
+  // nama COWL: "maya", "@maya", "cowl.pro/maya"
+  const nmm = !m && (raw.match(/^(?:https?:\/\/)?(?:www\.)?cowl\.pro\/([a-z0-9-]{3,20})\/?(?:[?#].*)?$/i) || raw.match(/^@?([a-z0-9-]{3,20})$/i));
+  if (nmm && !/^0x/i.test(nmm[1])) {
+    const n = nmm[1].toLowerCase();
+    setResolve('<span class="note">Looking up this COWL name…</span>');
+    try {
+      const r = await fetch('/api/names/' + encodeURIComponent(n), { cache: 'no-store' });
+      if (!r.ok) return setResolve(`<span class="note warn">No one has claimed cowl.pro/${esc(n)} yet.</span>`);
+      const j = await r.json();
+      S.send.meta = parseMetaAddress(j.meta);
+      return setResolve(`<span class="note ok">✓ cowl.pro/${esc(n)} found. Their wallet will not appear in this payment.</span>`);
+    } catch (e) { return setResolve(`<span class="note bad">${esc(niceError(e))}</span>`); }
+  }
   try {
     if (/^st:|^0x[0-9a-fA-F]{132}$/.test(raw)) {
       S.send.meta = parseMetaAddress(raw);

@@ -424,8 +424,7 @@ em { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-w
 
 /* ---------- alat baru: link tagihan + tombol Pay me privately ---------- */
 .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
-.tool-soon { grid-column: 1 / -1; border-style: dashed; }
-.tool-soon .kicker { color: var(--warn); }
+.tool-wide { grid-column: 1 / -1; }
 .tool { border: 1px solid var(--line); border-radius: 22px; padding: 28px; background: linear-gradient(180deg, #0c0c0d, #070708); display: grid; align-content: start; gap: 12px; }
 .tool .kicker { color: #8fb3ff; }
 .tool h3 { font-size: 24px; font-weight: 600; letter-spacing: -.02em; margin: 0; }

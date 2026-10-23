@@ -77,6 +77,7 @@ app/
   pages/                  HTML (built into app/public)
   public/                 CSS, config.json, static assets
 server/server.mjs   static server + announcement indexer (/api/announcements, /api/stats)
+                    + COWL Names: cowl.pro/name → receive keys (/api/names, claim needs $COWL)
                     + $COWL trades read from the Pons bonding curve (/api/token)
 test/
   stealth.test.mjs        offline unit tests for the cryptography

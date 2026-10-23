@@ -19,4 +19,6 @@ for (const f of readdirSync(path.join(root, 'app/pages'))) {
   const html = readFileSync(path.join(root, 'app/pages', f), 'utf8').replaceAll('__V__', V);
   writeFileSync(path.join(root, 'app/public', f), html);
 }
+// kriptografi untuk server (COWL Names): satu berkas tanpa dependensi
+await build({ entryPoints: [path.join(root, 'tools/sig-src.mjs')], outfile: path.join(root, 'server/vendor-sig.mjs'), bundle: true, format: 'esm', platform: 'node', minify: true, logLevel: 'warning' });
 console.log('build', V, entries.join(', '));

@@ -6,6 +6,8 @@ import { readFile, writeFile, mkdir, stat, rename } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createHash, randomBytes } from 'node:crypto';
+import { recoverPersonal } from './vendor-sig.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = process.env.COWL_PUBLIC || path.join(ROOT, '..', 'app', 'public');
@@ -247,6 +249,79 @@ function tokenPayload() {
   };
 }
 
+// ---------- COWL Names: cowl.pro/nama → kunci penerima (meta-address), bukan dompet ----------
+// Klaim wajib memegang $COWL (dicek on-chain saat klaim). Server menyimpan hash bergaram dari dompet pengklaim
+// hanya supaya dompet itu yang bisa mengubah/melepas namanya; hash tidak pernah dipublikasikan.
+const NM = cfg.names || { minHold: 100000, minLen: 3, maxLen: 20 };
+const NAMES_FILE = path.join(DATA, 'names.json');
+let names = { salt: '', byName: {}, byOwner: {} };
+const RESERVED = new Set(('receive send inbox pay app api assets roadmap transparency index lab admin cowl cowlhq cowlpro official support help team '
+  + 'dev devs mod mods moderator root www mail static config live favicon robots sitemap about terms privacy blog docs names name '
+  + 'robinhood pons uniswap dexscreener blockscout github telegram twitter x claim release').split(' '));
+const NAME_RE = new RegExp(`^[a-z0-9](?:[a-z0-9-]{${NM.minLen - 2},${NM.maxLen - 2}})[a-z0-9]$`);
+function nameProblem(n) {
+  if (typeof n !== 'string' || !NAME_RE.test(n)) return `Use ${NM.minLen}–${NM.maxLen} lowercase letters, numbers or hyphens.`;
+  if (n.includes('--')) return 'No double hyphens.';
+  if (RESERVED.has(n)) return 'That name is reserved.';
+  return null;
+}
+const META_RE = /^st:eth:0x(0[23][0-9a-f]{64}){2}$/;
+async function loadNames() {
+  if (existsSync(NAMES_FILE)) { try { names = JSON.parse(await readFile(NAMES_FILE, 'utf8')); } catch {} }
+  if (!names.salt) { names.salt = randomBytes(16).toString('hex'); await saveNames(); }
+}
+async function saveNames() { await mkdir(DATA, { recursive: true }); const tmp = NAMES_FILE + '.tmp'; await writeFile(tmp, JSON.stringify(names)); await rename(tmp, NAMES_FILE); }
+const ownerKey = (addr) => createHash('sha256').update(names.salt + ':' + addr.toLowerCase()).digest('hex');
+const claimMessage = (b) => ['COWL Names · Claim', '', `Name: cowl.pro/${b.name}`, `Points to: ${b.meta}`, `Wallet: ${b.address}`, `Issued: ${b.issued}`, '', 'Signing is free. It sends nothing and moves nothing.'].join('\n');
+const releaseMessage = (b) => ['COWL Names · Release', '', `Name: cowl.pro/${b.name}`, `Wallet: ${b.address}`, `Issued: ${b.issued}`, '', 'Signing is free. It sends nothing and moves nothing.'].join('\n');
+async function holdingOf(addr) {
+  const raw = await rpc('eth_call', [{ to: TOK.ca, data: '0x70a08231' + addr.slice(2).toLowerCase().padStart(64, '0') }, 'latest']);
+  return BigInt(raw);
+}
+function checkSigned(b, msgFn) {
+  if (!b || typeof b.address !== 'string' || !/^0x[0-9a-fA-F]{40}$/.test(b.address)) throw new Error('Bad wallet address');
+  const age = Math.abs(Date.now() - Date.parse(b.issued));
+  if (!(age < 10 * 60 * 1000)) throw new Error('Signature expired. Try again.');
+  const who = recoverPersonal(msgFn(b), String(b.signature || ''));
+  if (who !== b.address.toLowerCase()) throw new Error('Signature does not match the wallet');
+  return who;
+}
+async function claimName(b) {
+  const prob = nameProblem(b?.name); if (prob) throw new Error(prob);
+  if (!META_RE.test(String(b.meta || '').toLowerCase())) throw new Error('Bad receive keys');
+  b.meta = b.meta.toLowerCase();
+  const who = checkSigned(b, claimMessage);
+  const key = ownerKey(who);
+  const cur = names.byName[b.name];
+  if (cur && cur.owner !== key) throw new Error('That name is taken.');
+  const mine = names.byOwner[key];
+  if (mine && mine !== b.name) throw new Error(`This wallet already holds cowl.pro/${mine}. Release it first.`);
+  const need = BigInt(NM.minHold) * 10n ** 18n;
+  const have = await holdingOf(who);
+  if (have < need) throw new Error(`Claiming needs ${Number(NM.minHold).toLocaleString('en-US')} $COWL in this wallet.`);
+  names.byName[b.name] = { meta: b.meta, owner: key, claimedAt: cur?.claimedAt || new Date().toISOString(), updatedAt: new Date().toISOString() };
+  names.byOwner[key] = b.name;
+  await saveNames();
+  return { name: b.name, meta: b.meta };
+}
+async function releaseName(b) {
+  const prob = nameProblem(b?.name); if (prob) throw new Error(prob);
+  const who = checkSigned(b, releaseMessage);
+  const key = ownerKey(who);
+  const cur = names.byName[b.name];
+  if (!cur || cur.owner !== key) throw new Error('This wallet does not hold that name.');
+  delete names.byName[b.name]; delete names.byOwner[key];
+  await saveNames();
+  return { released: b.name };
+}
+// batas sederhana per IP untuk POST
+const hits = new Map();
+function limited(ip) { const now = Date.now(); const h = (hits.get(ip) || []).filter((t) => now - t < 60000); h.push(now); hits.set(ip, h); return h.length > 12; }
+function readBody(req) {
+  return new Promise((ok, bad) => { let d = ''; req.on('data', (c) => { d += c; if (d.length > 8192) { bad(new Error('Too large')); req.destroy(); } }); req.on('end', () => { try { ok(JSON.parse(d || '{}')); } catch { bad(new Error('Bad JSON')); } }); });
+}
+const NAME_PATH = new RegExp(`^/([a-z0-9-]{${NM.minLen},${NM.maxLen}})/?$`);
+
 // ---------- HTTP ----------
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
@@ -274,7 +349,10 @@ async function serveStatic(req, res, urlPath) {
   const file = path.normalize(path.join(PUBLIC, p));
   if (!file.startsWith(PUBLIC) || path.basename(file).startsWith('.')) return send(res, 404, 'Not found');
   let st;
-  try { st = await stat(file); } catch { return send(res, 404, 'Not found', { 'content-type': 'text/plain' }); }
+  try { st = await stat(file); } catch {
+    if (NAME_PATH.test(p) && !RESERVED.has(p.replace(/\//g, ''))) return serveStatic(req, res, '/app.html');
+    return send(res, 404, 'Not found', { 'content-type': 'text/plain' });
+  }
   if (!st.isFile()) return send(res, 404, 'Not found');
   const ext = path.extname(file).toLowerCase();
   const type = TYPES[ext] || 'application/octet-stream';
@@ -316,6 +394,27 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, readFileSync(CFG_FILE), { 'content-type': TYPES['.json'], 'cache-control': 'no-store' });
     }
     if (url.pathname === '/api/token') return TOK ? json(res, tokenPayload()) : json(res, { error: 'no token' }, 404);
+    if (url.pathname === '/api/names' && req.method === 'GET') {
+      const meta = (url.searchParams.get('meta') || '').toLowerCase();
+      const list = meta ? Object.entries(names.byName).filter(([, v]) => v.meta === meta).map(([k]) => k) : [];
+      return json(res, { names: list, count: Object.keys(names.byName).length, minHold: NM.minHold });
+    }
+    if (url.pathname.startsWith('/api/names/') && req.method === 'GET') {
+      const n = decodeURIComponent(url.pathname.slice(11)).toLowerCase();
+      const rec = names.byName[n];
+      if (rec) return json(res, { name: n, meta: rec.meta, claimedAt: rec.claimedAt });
+      const prob = nameProblem(n);
+      return json(res, { name: n, available: !prob, reason: prob }, 404);
+    }
+    if ((url.pathname === '/api/names/claim' || url.pathname === '/api/names/release') && req.method === 'POST') {
+      const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress;
+      if (limited(ip)) return json(res, { error: 'Too many requests. Wait a minute.' }, 429);
+      try {
+        const body = await readBody(req);
+        const out = url.pathname.endsWith('claim') ? await claimName(body) : await releaseName(body);
+        return json(res, out);
+      } catch (e) { return json(res, { error: String(e.message || e) }, 400); }
+    }
     if (url.pathname === '/api/health') return json(res, { ok: !lastError, head, indexed: db.lastBlock, error: lastError });
     if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed');
     await serveStatic(req, res, url.pathname);
@@ -326,6 +425,7 @@ const server = http.createServer(async (req, res) => {
 
 await loadDb();
 await loadTok();
+await loadNames();
 server.listen(PORT, HOST, () => console.log(`COWL di http://${HOST}:${PORT} · indeks dari blok ${db.lastBlock + 1}`));
 syncOnce();
 setInterval(syncOnce, 4000);

@@ -60,6 +60,7 @@
       <tr><td>Sender's wallet</td><td class="pub">Public</td><td>The payer signs a normal transaction from their own wallet.</td></tr>
       <tr><td>Withdrawal destination</td><td class="pub">Public</td><td>Withdrawing to your main wallet links that payment to it. Withdraw to a fresh wallet to stay hidden.</td></tr>
       <tr><td>Short link (0x…)</td><td class="pub">Names your wallet</td><td>The short link is your wallet address. Whoever you share it with knows the payment is for that wallet. The chain still does not link the payment to it. Share the long link to avoid this.</td></tr>
+      <tr><td>COWL Name (cowl.pro/name)</td><td class="pub">Public</td><td>A name and the receive keys it points to are public. The wallet that claimed it is not published: the server keeps only a salted hash so that wallet can change or release the name. Payers never see your wallet.</td></tr>
       <tr><td>Registered receive keys</td><td class="pub">Public</td><td>Registering a short link publishes your public keys next to your address. Incoming payments are still unlinkable.</td></tr>
     </tbody>
   </table>
@@ -104,7 +105,6 @@ Key version: 1</pre>
   <h2>Not done yet</h2>
   <ul>
     <li><b>Independent audit:</b> not yet. The router is short and verified; the cryptography follows ERC-5564 scheme 1 with the audited <code>@noble/curves</code> library.</li>
-    <li><b>COWL Names (in development):</b> short names like cowl.pro/maya that point to your receive keys instead of your wallet. Claiming will require holding $COWL. Names will be public. No date until it is live and verified.</li>
     <li><b>Relayer:</b> withdrawals currently use a small amount of ETH sent along by the payer. A relayer is next.</li>
     <li><b>Hidden amounts:</b> not planned without zero-knowledge proofs and an audit. We will not claim it.</li>
   </ul>

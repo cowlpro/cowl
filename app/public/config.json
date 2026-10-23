@@ -54,5 +54,10 @@
       "fromBlock": 94120000,
       "venue": "Uniswap v4"
     }
+  },
+  "names": {
+    "minHold": 100000,
+    "minLen": 3,
+    "maxLen": 20
   }
 }

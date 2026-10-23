@@ -60,6 +60,7 @@
       <tr><td>Sender's wallet</td><td class="pub">Public</td><td>The payer signs a normal transaction from their own wallet.</td></tr>
       <tr><td>Withdrawal destination</td><td class="pub">Public</td><td>Withdrawing to your main wallet links that payment to it. Withdraw to a fresh wallet to stay hidden.</td></tr>
       <tr><td>Short link (0x…)</td><td class="pub">Names your wallet</td><td>The short link is your wallet address. Whoever you share it with knows the payment is for that wallet. The chain still does not link the payment to it. Share the long link to avoid this.</td></tr>
+      <tr><td>Payment proof</td><td class="pub">Shared by you</td><td>A proof shows one one-time address and the transaction that paid it, signed with that address's key. It never contains your main wallet. Share it only with whoever needs it.</td></tr>
       <tr><td>COWL Name (cowl.pro/name)</td><td class="pub">Public</td><td>A name and the receive keys it points to are public. The wallet that claimed it is not published: the server keeps only a salted hash so that wallet can change or release the name. Payers never see your wallet.</td></tr>
       <tr><td>Registered receive keys</td><td class="pub">Public</td><td>Registering a short link publishes your public keys next to your address. Incoming payments are still unlinkable.</td></tr>
     </tbody>
@@ -73,6 +74,7 @@
     <tbody>
       <tr><td>ERC-5564 Announcer</td><td><a class="u" data-addr="announcer" target="_blank" rel="noopener"><code data-addr-text="announcer"></code></a><br>Standard contract, deployed with the canonical CREATE2 address. Logs each payment.</td></tr>
       <tr><td>ERC-6538 Registry</td><td><a class="u" data-addr="registry" target="_blank" rel="noopener"><code data-addr-text="registry"></code></a><br>Standard contract. Maps a wallet to its public receive keys.</td></tr>
+      <tr><td>COWL Batch</td><td><a class="u" data-addr="batch" target="_blank" rel="noopener"><code data-addr-text="batch"></code></a><br>Private payroll: pays up to 100 one-time addresses and logs one announcement each, in one transaction. No owner, no fee, no admin functions, never holds a balance. Source verified on Sourcify.</td></tr>
       <tr><td>COWL Router</td><td><a class="u" data-addr="router" target="_blank" rel="noopener"><code data-addr-text="router">Deploying</code></a><br>Sends ETH or a token to the one-time address and calls the Announcer in the same transaction. No owner, no fee, no admin functions, never holds a balance. Source verified on Blockscout.</td></tr>
     </tbody>
   </table>
@@ -115,9 +117,9 @@ Key version: 1</pre>
 <footer class="foot"><p class="foot-note">COWL is open-source software, not a bank or broker. Unaudited; use at your own risk.</p><div class="foot-word" aria-hidden="true">COWL</div></footer>
 <script type="module">
   const c = await fetch('/config.json', { cache: 'no-store' }).then((r) => r.json());
-  for (const k of ['announcer', 'registry', 'router']) {
+  for (const k of ['announcer', 'registry', 'router', 'batch']) {
     if (!c[k]) continue;
-    document.querySelectorAll(`[data-addr="${k}"]`).forEach((a) => (a.href = `${c.explorer}/address/${c[k]}${k === 'router' ? '?tab=contract' : ''}`));
+    document.querySelectorAll(`[data-addr="${k}"]`).forEach((a) => (a.href = `${c.explorer}/address/${c[k]}${k === 'router' || k === 'batch' ? '?tab=contract' : ''}`));
     document.querySelectorAll(`[data-addr-text="${k}"]`).forEach((e) => (e.textContent = c[k]));
   }
 </script>

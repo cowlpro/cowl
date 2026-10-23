@@ -22,6 +22,8 @@ const cfg = JSON.parse(readFileSync(CFG_FILE, 'utf8'));
 const RPCS = (process.env.COWL_RPC ? process.env.COWL_RPC.split(',') : cfg.indexerRpcs);
 const ANNOUNCER = cfg.announcer.toLowerCase();
 const ROUTER = (cfg.router || '').toLowerCase();
+// kontrak COWL yang memanggil Announcer: Router (satu penerima) dan Batch (private payroll)
+const COWL_CALLERS = new Set([cfg.router, cfg.batch].filter(Boolean).map((a) => a.toLowerCase()));
 const START_BLOCK = Number(process.env.COWL_START_BLOCK || cfg.startBlock || 0);
 const ANNOUNCEMENT_TOPIC = '0x5f0eab8057630ba7676c49b4f21a0231414e79474595be8e4c432fbf6bf0f4e7';
 const CHUNK = 5000;
@@ -257,7 +259,7 @@ const NAMES_FILE = path.join(DATA, 'names.json');
 let names = { salt: '', byName: {}, byOwner: {} };
 const RESERVED = new Set(('receive send inbox pay app api assets roadmap transparency index lab admin cowl cowlhq cowlpro official support help team '
   + 'dev devs mod mods moderator root www mail static config live favicon robots sitemap about terms privacy blog docs names name '
-  + 'robinhood pons uniswap dexscreener blockscout github telegram twitter x claim release').split(' '));
+  + 'robinhood pons uniswap dexscreener blockscout github telegram twitter x claim release verify proof').split(' '));
 const NAME_RE = new RegExp(`^[a-z0-9](?:[a-z0-9-]{${NM.minLen - 2},${NM.maxLen - 2}})[a-z0-9]$`);
 function nameProblem(n) {
   if (typeof n !== 'string' || !NAME_RE.test(n)) return `Use ${NM.minLen}–${NM.maxLen} lowercase letters, numbers or hyphens.`;
@@ -276,7 +278,7 @@ const claimMessage = (b) => ['COWL Names · Claim', '', `Name: cowl.pro/${b.name
 const releaseMessage = (b) => ['COWL Names · Release', '', `Name: cowl.pro/${b.name}`, `Wallet: ${b.address}`, `Issued: ${b.issued}`, '', 'Signing is free. It sends nothing and moves nothing.'].join('\n');
 async function holdingOf(addr) {
   const raw = await rpc('eth_call', [{ to: TOK.ca, data: '0x70a08231' + addr.slice(2).toLowerCase().padStart(64, '0') }, 'latest']);
-  return BigInt(raw);
+  return raw && raw !== '0x' ? BigInt(raw) : 0n;
 }
 function checkSigned(b, msgFn) {
   if (!b || typeof b.address !== 'string' || !/^0x[0-9a-fA-F]{40}$/.test(b.address)) throw new Error('Bad wallet address');
@@ -297,7 +299,7 @@ async function claimName(b) {
   const mine = names.byOwner[key];
   if (mine && mine !== b.name) throw new Error(`This wallet already holds cowl.pro/${mine}. Release it first.`);
   const need = BigInt(NM.minHold) * 10n ** 18n;
-  const have = await holdingOf(who);
+  const have = need === 0n ? 0n : await holdingOf(who);
   if (have < need) throw new Error(`Claiming needs ${Number(NM.minHold).toLocaleString('en-US')} $COWL in this wallet.`);
   names.byName[b.name] = { meta: b.meta, owner: key, claimedAt: cur?.claimedAt || new Date().toISOString(), updatedAt: new Date().toISOString() };
   names.byOwner[key] = b.name;
@@ -327,7 +329,7 @@ const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg',
   '.webp': 'image/webp', '.mp4': 'video/mp4', '.webm': 'video/webm', '.woff2': 'font/woff2', '.ico': 'image/x-icon',
-  '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml',
+  '.txt': 'text/plain; charset=utf-8', '.webmanifest': 'application/manifest+json', '.xml': 'application/xml',
 };
 
 function send(res, code, body, headers = {}) {
@@ -338,7 +340,7 @@ const json = (res, obj, code = 200) =>
   send(res, code, JSON.stringify(obj), { 'content-type': TYPES['.json'], 'cache-control': 'no-store', 'access-control-allow-origin': '*' });
 
 // rute halaman aplikasi
-const APP_ROUTES = [/^\/app\/?$/, /^\/pay\/[^/]+\/?$/, /^\/inbox\/?$/, /^\/receive\/?$/, /^\/send\/?$/];
+const APP_ROUTES = [/^\/verify\/?$/, /^\/app\/?$/, /^\/pay\/[^/]+\/?$/, /^\/inbox\/?$/, /^\/receive\/?$/, /^\/send\/?$/];
 
 async function serveStatic(req, res, urlPath) {
   let p = decodeURIComponent(urlPath);
@@ -384,7 +386,7 @@ const server = http.createServer(async (req, res) => {
       return json(res, { items: db.items.slice(since, since + 5000), total: db.items.length, head, indexed: db.lastBlock });
     }
     if (url.pathname === '/api/stats') {
-      const viaCowl = ROUTER ? db.items.filter((i) => i.c === ROUTER).length : 0;
+      const viaCowl = db.items.filter((i) => COWL_CALLERS.has(i.c)).length;
       return json(res, {
         announcements: db.items.length, viaCowl, head, indexed: db.lastBlock,
         lag: head ? head - db.lastBlock : null, ok: !lastError, latest: db.items.slice(-6).reverse().map((i) => ({ t: i.t, s: i.s, x: i.x, m: i.m.slice(0, 12) })),

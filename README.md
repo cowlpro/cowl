@@ -26,6 +26,7 @@ Keys never leave the browser. The server only relays public `Announcement` logs.
 | ERC-5564 Announcer | [`0x55649E01B5Df198D18D95b5cc5051630cfD45564`](https://robinhoodchain.blockscout.com/address/0x55649E01B5Df198D18D95b5cc5051630cfD45564) | Canonical standard contract (CREATE2 address). Not ours. |
 | ERC-6538 Registry | [`0x6538E6bf4B0eBd30A8Ea093027Ac2422ce5d6538`](https://robinhoodchain.blockscout.com/address/0x6538E6bf4B0eBd30A8Ea093027Ac2422ce5d6538) | Canonical standard contract. Not ours. |
 | **CowlRouter** | [`0x5A254fE1f65e5cbBe978095ab4632E7446Bd8590`](https://robinhoodchain.blockscout.com/address/0x5A254fE1f65e5cbBe978095ab4632E7446Bd8590?tab=contract) | [`contracts/src/CowlRouter.sol`](contracts/src/CowlRouter.sol). Verified on Blockscout. |
+| **CowlBatch** | [`0xF9283367d8c3CCeCde46EfcA2f63385343269E9F`](https://robinhoodchain.blockscout.com/address/0xF9283367d8c3CCeCde46EfcA2f63385343269E9F) | Private payroll: up to 100 payments in one transaction. [`contracts/src/CowlBatch.sol`](contracts/src/CowlBatch.sol). No owner, no fee, holds nothing. Verified on [Sourcify](https://repo.sourcify.dev/4663/0xF9283367d8c3CCeCde46EfcA2f63385343269E9F). |
 | $COWL token | [`0xdCfa97774BA2cb8a9deD0612524984f6f46d4556`](https://robinhoodchain.blockscout.com/token/0xdCfa97774BA2cb8a9deD0612524984f6f46d4556) | Launched on Pons V2. |
 
 **CowlRouter properties:**
@@ -67,7 +68,9 @@ Expected keccak256 of the runtime code: `0xb52f6af50e9580100511ed88672e3056ccc85
 ```
 contracts/          Foundry project
   src/CowlRouter.sol      the router (exact verified source)
+  src/CowlBatch.sol       private payroll (many payments, one transaction)
   test/CowlRouter.t.sol   fork tests against the live Announcer and real NVDA stock tokens
+  test/CowlBatch.t.sol    fork tests for payroll in ETH and stock tokens
 app/
   src/stealth.js          ERC-5564 scheme 1 cryptography (@noble/curves, @noble/hashes)
   src/chain.js            RPC, wallet discovery (EIP-6963), contract ABIs

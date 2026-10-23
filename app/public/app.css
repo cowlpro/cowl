@@ -202,3 +202,28 @@ details.meta[open] summary::after { content: ' −'; }
 .nm-field .input:focus { border: 0; }
 #nm-hold b { font-weight: 500; }
 #nm-hold b.ok { color: var(--good); } #nm-hold b.warn { color: var(--warn); }
+
+/* ---------- private payroll ---------- */
+.mode-seg { margin-bottom: 18px; }
+.pr-text { min-height: 150px; resize: vertical; line-height: 1.6; font-size: 13.5px; }
+.pr-list { margin: 16px 0 6px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; max-height: 320px; overflow-y: auto; }
+.pr-row { display: grid; grid-template-columns: 30px 1fr auto auto; gap: 12px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--line); font-size: 13.5px; }
+.pr-row:first-child { border-top: 0; }
+.pr-row .mono { color: var(--muted); font-size: 12px; }
+.pr-who { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pr-st { font-size: 12.5px; color: var(--muted); text-align: right; }
+.pr-row.ok .pr-st { color: var(--good); }
+.pr-row.bad .pr-st { color: var(--warn); }
+
+/* ---------- bukti pembayaran ---------- */
+.ib-acts { display: inline-flex; gap: 8px; justify-content: flex-end; }
+.pf-pre { white-space: pre-wrap; margin: 6px 0 12px; font-size: 12px; line-height: 1.6; }
+.vf-res { margin-top: 18px; border: 1px solid var(--line-2); border-radius: 14px; padding: 16px 18px 6px; }
+.vf-res > b { display: block; font-weight: 500; margin-bottom: 8px; }
+.vf-res.ok { border-color: #7ee0b055; background: #7ee0b00a; } .vf-res.ok > b { color: var(--good); }
+.vf-res.bad { border-color: #ffb54755; background: #ffb5470a; } .vf-res.bad > b { color: var(--warn); }
+
+/* ---------- pindai QR ---------- */
+.scan-box { position: relative; border-radius: 16px; overflow: hidden; background: #000; aspect-ratio: 1; margin: 6px 0 12px; }
+.scan-box video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.scan-box i { position: absolute; inset: 18%; border: 2px solid #ffffffb0; border-radius: 18px; box-shadow: 0 0 0 999px #0006; }

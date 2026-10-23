@@ -19,6 +19,9 @@
 <meta name="twitter:image" content="https://cowl.pro/assets/og.jpg">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="COWL">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap"></noscript>
@@ -59,7 +62,7 @@
   <div class="vtext right" aria-hidden="true">Chain 4663 · Non-custodial</div>
 
   <div class="hero-copy">
-    <a class="hero-ann" href="/receive"><span class="dot-live"></span><b>COWL Names are live</b><i aria-hidden="true"></i><span>Claim cowl.pro/yourname</span><span class="arrow" aria-hidden="true">→</span></a>
+    <a class="hero-ann" href="/send"><span class="dot-live"></span><b>New: private payroll</b><i aria-hidden="true"></i><span>Pay 100 people in one transaction</span><span class="arrow" aria-hidden="true">→</span></a>
     <h1>Your wallet is a public statement. <em>Put a hood on it.</em></h1>
     <p>COWL gives you a private receive link. Every payment lands in a fresh address that only you can open. No pool, no custody, no mixer.</p>
     <div class="hero-actions">
@@ -209,6 +212,20 @@
       <div class="tool-badges"><img src="/assets/badge-dark.svg" alt="Pay me privately with COWL, dark" width="232" height="48" loading="lazy"><img src="/assets/badge-light.svg" alt="Pay me privately with COWL, light" width="232" height="48" loading="lazy"></div>
       <a class="btn small" href="/receive">Get your button <span class="arrow">→</span></a>
     </article>
+    <article class="tool">
+      <span class="kicker">New · Private payroll</span>
+      <h3>Pay many people. One transaction.</h3>
+      <p>Paste names, links or addresses with amounts, up to 100 per transaction. Everyone gets a fresh one-time address. Download the receipts as CSV.</p>
+      <div class="mini"><div class="mini-row"><span>maya, jon, cowl.pro/ali</span><b>3 paid</b></div><div class="mini-row"><span>Recipient wallets on-chain</span><b class="ok">Hidden</b></div></div>
+      <a class="btn small" href="/send">Open payroll <span class="arrow">→</span></a>
+    </article>
+    <article class="tool">
+      <span class="kicker">New · Payment proofs</span>
+      <h3>Prove you were paid.</h3>
+      <p>Sign a proof in your Inbox with the payment's one-time key. Anyone can check it at cowl.pro/verify, and it never reveals your main wallet.</p>
+      <div class="mini"><div class="mini-row"><span>Proof checked</span><b class="ok">Valid</b></div><div class="mini-row"><span>Main wallet revealed</span><b class="ok">No</b></div></div>
+      <a class="btn small" href="/verify">Verify a proof <span class="arrow">→</span></a>
+    </article>
     <article class="tool tool-wide">
       <span class="kicker">New · COWL Names · for $COWL holders</span>
       <h3>A short name, not your wallet.</h3>
@@ -352,11 +369,11 @@
     <p>We work top to bottom and move things to Shipped only when you can try them on mainnet.</p></div>
   <div class="rmt-grid">
     <a class="rmt-col done" href="/roadmap"><span class="rmt-pill">Shipped</span>
-      <ul><li>Private receive links and Inbox</li><li>Payment requests and the Pay me privately button</li><li><b>COWL Names</b> for $COWL holders</li><li>Open source, verified Router</li></ul></a>
-    <a class="rmt-col now" href="/roadmap"><span class="rmt-pill"><i></i>Building now</span>
-      <ul><li><b>Relayer</b></li><li>Withdraw a payment without holding ETH first</li><li>Never holds your funds</li></ul></a>
-    <a class="rmt-col next" href="/roadmap"><span class="rmt-pill">Up next</span>
-      <ul><li><b>For teams</b>: private payroll</li><li>Payment receipts you can prove</li></ul></a>
+      <ul><li>Private links, requests and Pay me privately button</li><li><b>COWL Names</b> for $COWL holders</li><li><b>Private payroll</b> and payment proofs</li><li>Home screen app with QR scan</li></ul></a>
+    <a class="rmt-col now" href="/roadmap"><span class="rmt-pill"><i></i>In design</span>
+      <ul><li><b>Relayer</b></li><li>Withdraw without holding ETH first</li><li>Ships only with a design that never holds funds</li></ul></a>
+    <a class="rmt-col next" href="/roadmap"><span class="rmt-pill">Exploring</span>
+      <ul><li>Telegram payment requests</li><li>Split withdrawals over time</li></ul></a>
   </div>
   <div class="rmt-cta"><a class="btn" href="/roadmap">See the full roadmap <span class="arrow">→</span></a></div>
 </section>

@@ -26,7 +26,7 @@
   .rules b { display: block; font-weight: 500; font-size: 15px; margin-bottom: 6px; }
   .rules span { color: var(--muted); font-size: 13.5px; line-height: 1.5; }
   .track { position: relative; padding-left: 46px; }
-  .track::before { content: ''; position: absolute; left: 15px; top: 8px; bottom: 8px; width: 1px; background: linear-gradient(180deg, var(--good) 0%, var(--good) 50%, var(--warn) 58%, var(--line-2) 76%); }
+  .track::before { content: ''; position: absolute; left: 15px; top: 8px; bottom: 8px; width: 1px; background: linear-gradient(180deg, var(--good) 0%, var(--good) 52%, var(--warn) 58%, var(--good) 66%, var(--good) 80%, var(--line-2) 90%); }
   .phase { position: relative; margin-bottom: 26px; }
   .phase .dot { position: absolute; left: -46px; top: 22px; width: 31px; height: 31px; border-radius: 50%; display: grid; place-items: center; font: 500 11px var(--mono); background: #000; border: 1px solid var(--line-2); color: var(--muted); }
   .phase.done .dot { border-color: #7ee0b066; color: var(--good); }
@@ -139,22 +139,23 @@
     <section class="phase now">
       <span class="dot">04</span>
       <div class="card">
-        <div class="ph-head"><h2>Withdraw without ETH</h2><span class="pill now"><i></i>Building now</span></div>
-        <p class="ph-intro">Today, moving a token payment out of its one-time address uses a little ETH the sender attached. A relayer removes that step.</p>
+        <div class="ph-head"><h2>Withdraw without ETH</h2><span class="pill now"><i></i>In design</span></div>
+        <p class="ph-intro">Today, moving a token payment out of its one-time address uses a little ETH the sender attached. A relayer removes that step. Robinhood stock tokens do not support signed approvals, so the relayer needs a design that still never holds your funds. Until that design is right, it does not ship, and the phase below shipped first.</p>
         <div class="items">
-          <div class="it"><b>Relayer</b><span class="tag">In development</span><p>Withdrawals that do not need ETH in the one-time address first. Same rule as the Router: it never holds your funds.</p></div>
+          <div class="it"><b>Relayer</b><span class="tag">In design</span><p>Withdrawals that do not need ETH in the one-time address first. Same rule as the Router: it never holds your funds.</p></div>
         </div>
       </div>
     </section>
 
-    <section class="phase">
+    <section class="phase done">
       <span class="dot">05</span>
       <div class="card">
-        <div class="ph-head"><h2>For teams</h2><span class="pill">Planned</span></div>
+        <div class="ph-head"><h2>For teams</h2><span class="pill done">Shipped</span></div>
         <p class="ph-intro">Once single payments are effortless, the next step is paying many people, and proving it.</p>
         <div class="items">
-          <div class="it"><b>Private payroll</b><span class="tag">Planned</span><p>Pay a list of COWL links or names in one transaction. Each person gets a fresh address. Needs a new contract, verified like the Router.</p></div>
-          <div class="it"><b>Payment receipts</b><span class="tag">Planned</span><p>A receipt for the sender, and a way for the receiver to prove a payment arrived without revealing their main wallet.</p></div>
+          <div class="it"><b>Private payroll</b><a href="/send">Open</a><p>Pay up to 100 COWL names, links or registered addresses in one transaction. Each person gets a fresh address. A new contract, CowlBatch: no owner, no fee, holds nothing, source verified.</p></div>
+          <div class="it"><b>Payment receipts and proofs</b><a href="/verify">Verify</a><p>Senders download a receipt. Receivers sign a proof with the payment's one-time key, which anyone can check at cowl.pro/verify, without revealing their main wallet.</p></div>
+          <div class="it"><b>COWL on your home screen</b><span class="tag">Live</span><p>Install the app on your phone and scan a COWL QR to pay. The camera image never leaves the device.</p></div>
         </div>
       </div>
     </section>
@@ -165,7 +166,6 @@
         <div class="ph-head"><h2>Exploring</h2><span class="pill">Not committed</span></div>
         <p class="ph-intro">Ideas we are weighing. They may change shape, or not happen at all.</p>
         <div class="items">
-          <div class="it"><b>COWL on your home screen</b><span class="tag">Exploring</span><p>Install the app on your phone and scan a QR to pay.</p></div>
           <div class="it"><b>Telegram requests</b><span class="tag">Exploring</span><p>Create a payment request from a chat. The bot would never hold a key.</p></div>
           <div class="it"><b>Split withdrawals</b><span class="tag">Exploring</span><p>Withdraw in parts over time, so timing and amounts are harder to link.</p></div>
         </div>

@@ -30,7 +30,8 @@
     "firstWithdrawTx": "0x4e28cf14f2a09e6162eaba0edb6e510c041146cc25388a451c9431ea61ebc9ed",
     "firstWithdrawAt": "2026-10-18T20:45:23Z",
     "sendGasEth": "0.0000013",
-    "withdrawGasEth": "0.0000004"
+    "withdrawGasEth": "0.0000004",
+    "batchDeployTx": "0x91bc5632ac03d45998703ff38bbeeb2e96b62363ed660d00833cb4cae3cd0838"
   },
   "github": "https://github.com/cowlpro/cowl",
   "token": {
@@ -59,5 +60,6 @@
     "minHold": 100000,
     "minLen": 3,
     "maxLen": 20
-  }
+  },
+  "batch": "0xF9283367d8c3CCeCde46EfcA2f63385343269E9F"
 }

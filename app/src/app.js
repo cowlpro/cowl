@@ -1,6 +1,7 @@
 // Aplikasi COWL: Receive (buat link), Send (kirim ke link), Inbox (temukan & tarik dana).
 // Kunci privat hanya hidup di memori tab ini. Tidak ada yang dikirim ke server.
 import qrcode from 'qrcode-generator';
+import jsQR from 'jsqr';
 import {
   SIGN_MESSAGE, keysFromSignature, generateStealth, checkAnnouncement, parseMetadata, parseMetaAddress,
 } from './stealth.js';
@@ -26,6 +27,8 @@ const S = {
   badge: 'dark',
   myName: null, // nama COWL milik kunci yang sedang terbuka
   nm: { input: '', status: null, busy: false, holding: null },
+  mode: 'one', // Send: satu penerima atau banyak (private payroll)
+  many: { text: '', rows: [], checking: false, busy: false, step: 0, result: null },
   inbox: { since: 0, scanned: 0, mine: new Map(), syncing: false, total: 0, err: '' },
 };
 
@@ -34,7 +37,7 @@ function routeFromPath() {
   const p = location.pathname;
   const m = p.match(/^\/pay\/([^/]+)/);
   const nmPath = p.match(/^\/([a-z0-9-]{3,20})\/?$/);
-  const target = m ? decodeURIComponent(m[1]) : nmPath && !['receive', 'send', 'inbox', 'app'].includes(nmPath[1]) ? nmPath[1] : null;
+  const target = m ? decodeURIComponent(m[1]) : nmPath && !['receive', 'send', 'inbox', 'app', 'verify'].includes(nmPath[1]) ? nmPath[1] : null;
   if (target) {
     S.view = 'send'; S.send.to = target;
     const q = new URLSearchParams(location.search);
@@ -47,7 +50,8 @@ function routeFromPath() {
     }
     return;
   }
-  if (p.startsWith('/send')) S.view = 'send';
+  if (p.startsWith('/verify')) S.view = 'verify';
+  else if (p.startsWith('/send')) S.view = 'send';
   else if (p.startsWith('/inbox')) S.view = 'inbox';
   else S.view = 'receive';
 }
@@ -290,6 +294,7 @@ function render() {
   const pane = $('#pane');
   if (S.view === 'receive') pane.innerHTML = viewReceive();
   else if (S.view === 'send') pane.innerHTML = viewSend();
+  else if (S.view === 'verify') pane.innerHTML = viewVerify();
   else pane.innerHTML = viewInbox();
   bindPane();
 }
@@ -405,7 +410,14 @@ function assetIcon(a) {
   return `<span class="tok">${esc(a.symbol.slice(0, 4))}</span>`;
 }
 
+function modeToggle() {
+  if (!CFG.batch) return '';
+  return `<div class="seg mode-seg" role="group" aria-label="Payment type">
+    <button type="button" data-act="mode" data-mode="one" aria-pressed="${S.mode === 'one'}">One person</button>
+    <button type="button" data-act="mode" data-mode="many" aria-pressed="${S.mode === 'many'}">Many people</button></div>`;
+}
 function viewSend() {
+  if (S.mode === 'many' && CFG.batch) return viewMany();
   const s = S.send;
   const routerReady = !!CFG.router;
   const isToken = s.asset.address !== 'eth';
@@ -420,11 +432,12 @@ function viewSend() {
         <div class="row"><span class="k">One-time address</span><a class="v mono" href="${addrUrl(s.result.stealth)}" target="_blank" rel="noopener">${short(s.result.stealth, 6)} ↗</a></div>
         <div class="row"><span class="k">Transaction</span><a class="v mono" href="${txUrl(s.result.tx)}" target="_blank" rel="noopener">${short(s.result.tx, 6)} ↗</a></div>
       </div>
-      <button class="btn" data-act="send-again">Send another</button>
+      <div class="link-actions"><button class="btn small primary" data-act="send-receipt">Download receipt</button><button class="btn small" data-act="send-again">Send another</button></div>
     </div>`;
   }
   return `
   <div class="card">
+    ${modeToggle()}
     <span class="kicker">Send privately</span>
     <h1>Pay a link, <span class="dim">not a wallet.</span></h1>
     <p class="lead">Paste a COWL link or the recipient's wallet address. A fresh one-time address is made for this payment only.</p>
@@ -434,7 +447,7 @@ function viewSend() {
       <small>The note comes from the link you opened. It is not written on-chain.</small></div>` : ''}
     <form id="send-form" autocomplete="off">
       <div class="field">
-        <label for="to">Recipient</label>
+        <div class="lab"><label for="to">Recipient</label><button type="button" class="max" data-act="scan">Scan QR</button></div>
         <input class="input mono" id="to" placeholder="cowl.pro/name, cowl.pro/pay/… or 0x…" value="${esc(s.to)}" spellcheck="false">
         <div class="resolve" id="resolve">${s.resolved}</div>
       </div>
@@ -456,6 +469,147 @@ function viewSend() {
       <p class="note" id="send-note">Amounts and your wallet stay public. Only the link between this payment and the recipient is hidden.</p>
     </form>
   </div>`;
+}
+
+// ===================================================================== private payroll (CowlBatch)
+const MAX_BATCH = 100;
+function viewMany() {
+  const m = S.many, a = S.send.asset, isToken = a.address !== 'eth';
+  if (m.result) {
+    return `
+    <div class="card">
+      <span class="kicker">Private payroll · sent</span>
+      <h1>${m.result.count} people paid. <span class="dim">One transaction.</span></h1>
+      <p class="lead">${esc(m.result.total)} ${esc(m.result.symbol)} went out to ${m.result.count} one-time addresses. None of them points to a recipient's wallet.</p>
+      <div class="summary"><div class="row"><span class="k">Transaction</span><a class="v mono" href="${txUrl(m.result.tx)}" target="_blank" rel="noopener">${short(m.result.tx, 6)} ↗</a></div></div>
+      <div class="link-actions"><button class="btn small primary" data-act="many-receipts">Download receipts (CSV)</button><button class="btn small" data-act="many-again">New payroll</button></div>
+    </div>`;
+  }
+  const ok = m.rows.filter((r) => r.meta && r.amount > 0n);
+  const total = ok.reduce((t, r) => t + r.amount, 0n);
+  const bad = m.rows.filter((r) => r.error);
+  const rows = m.rows.length ? `<div class="pr-list">${m.rows.map((r, i) => `
+      <div class="pr-row ${r.error ? 'bad' : r.meta ? 'ok' : ''}"><span class="mono">${i + 1}</span><span class="pr-who">${esc(r.label || r.raw)}</span>
+      <span class="num">${r.amount > 0n ? fmtAmount(r.amount, a.decimals) : '—'}</span><span class="pr-st">${r.error ? esc(r.error) : r.meta ? '✓' : '…'}</span></div>`).join('')}</div>` : '';
+  return `
+  <div class="card">
+    ${modeToggle()}
+    <span class="kicker">Private payroll</span>
+    <h1>Pay many people, <span class="dim">one transaction.</span></h1>
+    <p class="lead">One line per person: a COWL name, link or registered 0x address, then the amount. Each person gets a fresh one-time address.</p>
+    <div class="field">
+      <div class="lab"><label for="pr-text">Recipients</label><span>up to ${MAX_BATCH} · <button type="button" class="max" data-act="pr-csv">Import CSV</button></span></div>
+      <textarea class="input mono pr-text" id="pr-text" rows="7" spellcheck="false" placeholder="maya, 0.05&#10;cowl.pro/jon, 0.02&#10;0x8f3c…e21a, 0.01">${esc(m.text)}</textarea>
+      <input type="file" id="pr-file" accept=".csv,text/csv,text/plain" hidden>
+    </div>
+    <div class="field"><div class="lab"><span>Asset</span><span id="bal-line"></span></div>
+      <button type="button" class="asset-btn" data-act="asset">${assetIcon(a)}<span>${esc(a.symbol)}</span><span aria-hidden="true">▾</span></button></div>
+    <button class="btn block" data-act="pr-check" ${m.checking ? 'disabled' : ''}>${m.checking ? 'Checking recipients…' : 'Check recipients'}</button>
+    ${rows}
+    ${m.rows.length ? `<div class="summary">
+      <div class="row"><span class="k">Ready to pay</span><span class="v">${ok.length} of ${m.rows.length}${bad.length ? ` · <span style="color:var(--warn)">${bad.length} need fixing</span>` : ''}</span></div>
+      <div class="row"><span class="k">Total</span><span class="v num">${fmtAmount(total, a.decimals)} ${esc(a.symbol)}</span></div>
+      ${isToken ? `<div class="row"><span class="k">Withdraw gas for recipients</span><span class="v num">${CFG.gasTipEth} ETH × ${ok.length}</span></div>` : ''}
+      <div class="row"><span class="k">Recipient wallets on-chain</span><span class="v" style="color:var(--good)">Hidden</span></div>
+      <div class="row"><span class="k">COWL fee</span><span class="v">None</span></div>
+    </div>
+    ${isToken ? `<div class="stepper"><span class="${m.step === 1 ? 'on' : m.step > 1 ? 'done' : ''}"><b>1</b>Approve</span><i></i><span class="${m.step === 2 ? 'on' : m.step > 2 ? 'done' : ''}"><b>2</b>Pay everyone</span></div>` : ''}
+    <button class="btn primary block" data-act="pr-send" ${!ok.length || bad.length || m.busy ? 'disabled' : ''}>${!S.account ? 'Connect wallet' : m.busy ? 'Confirm in wallet…' : `Pay ${ok.length} ${ok.length === 1 ? 'person' : 'people'} privately`} <span class="arrow">→</span></button>
+    <p class="note">Fix or remove any line marked in orange first. Amounts and your wallet stay public, as with any payment.</p>` : ''}
+  </div>`;
+}
+// "maya, 0.05" / "cowl.pro/jon 0.02" / "0x…;0.01" → { raw, amountText }
+function parseLines(text) {
+  return text.split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !/^recipient\b/i.test(l)).map((l) => {
+    const m = l.match(/^(.+?)[\s,;\t]+([0-9]+(?:[.,][0-9]+)?)$/);
+    return m ? { raw: m[1].trim().replace(/,$/, ''), amountText: m[2].replace(',', '.') } : { raw: l, amountText: '' };
+  });
+}
+// satu penerima → meta-address (nama COWL, link /pay/, st:eth:, alamat 0x terdaftar)
+async function resolveOne(input) {
+  let raw = input.trim();
+  const pm = raw.match(/\/pay\/([^/?#\s]+)/);
+  if (pm) raw = decodeURIComponent(pm[1]);
+  if (/^st:|^0x[0-9a-fA-F]{132}$/.test(raw)) return { meta: parseMetaAddress(raw), label: short(raw.replace(/^st:eth:/, ''), 6) + ' (link)' };
+  if (ethers.isAddress(raw)) {
+    const reg = new ethers.Contract(CFG.registry, ABI.registry, readProvider());
+    const stored = await reg.stealthMetaAddressOf(raw, 1);
+    if (!stored || stored === ZERO_META) throw new Error('No COWL link for this wallet');
+    return { meta: parseMetaAddress(stored), label: short(ethers.getAddress(raw)) };
+  }
+  const nm = raw.match(/^(?:https?:\/\/)?(?:www\.)?cowl\.pro\/([a-z0-9-]{3,20})\/?$/i) || raw.match(/^@?([a-z0-9-]{3,20})$/i);
+  if (nm) {
+    const n = nm[1].toLowerCase();
+    const r = await fetch('/api/names/' + encodeURIComponent(n), { cache: 'no-store' });
+    if (!r.ok) throw new Error('Name not claimed');
+    return { meta: parseMetaAddress((await r.json()).meta), label: 'cowl.pro/' + n };
+  }
+  throw new Error('Not a COWL name, link or address');
+}
+async function checkMany() {
+  const m = S.many, a = S.send.asset;
+  const lines = parseLines(m.text);
+  if (!lines.length) return toast('Add at least one line');
+  if (lines.length > MAX_BATCH) return toast(`Up to ${MAX_BATCH} people per transaction`);
+  m.checking = true;
+  m.rows = lines.map((l) => ({ ...l, amount: 0n, meta: null, error: null, label: '' }));
+  render();
+  let i = 0;
+  const worker = async () => {
+    while (i < m.rows.length) {
+      const r = m.rows[i++];
+      try { r.amount = ethers.parseUnits(r.amountText || '0', a.decimals); } catch { r.amount = 0n; }
+      if (r.amount <= 0n) { r.error = 'Missing amount'; continue; }
+      try { const out = await resolveOne(r.raw); r.meta = out.meta; r.label = out.label; } catch (e) { r.error = niceError(e); }
+    }
+  };
+  await Promise.all([worker(), worker(), worker(), worker()]);
+  m.checking = false; render();
+}
+async function sendMany() {
+  const m = S.many, a = S.send.asset;
+  if (!S.account) return openWalletModal();
+  const rows = m.rows.filter((r) => r.meta && r.amount > 0n);
+  if (!rows.length) return;
+  m.busy = true; render();
+  try {
+    const sg = await signer();
+    const batch = new ethers.Contract(CFG.batch, ABI.batch, sg);
+    // alamat sekali pakai dibuat di browser, satu per orang
+    const pays = rows.map((r) => { const st = generateStealth(r.meta); r.stealth = st.stealthAddress; return [st.stealthAddress, st.ephemeralPubKey, ethers.toBeHex(st.viewTag, 1), r.amount]; });
+    const total = rows.reduce((t, r) => t + r.amount, 0n);
+    let tx;
+    if (a.address === 'eth') {
+      tx = await batch.sendEthBatch(pays, { value: total });
+    } else {
+      const tip = ethers.parseEther(CFG.gasTipEth);
+      const token = new ethers.Contract(a.address, ABI.erc20, sg);
+      if ((await token.allowance(S.account, CFG.batch)) < total) {
+        m.step = 1; render();
+        const ap = await token.approve(CFG.batch, total); // jumlah pas, tidak pernah tak terbatas
+        toast('Approving…'); await ap.wait();
+      }
+      m.step = 2; render();
+      tx = await batch.sendTokenBatch(a.address, pays, tip, { value: tip * BigInt(rows.length) });
+    }
+    toast('Paying everyone privately…');
+    await tx.wait();
+    m.result = { tx: tx.hash, count: rows.length, total: fmtAmount(total, a.decimals), symbol: a.symbol, rows: rows.map((r) => ({ who: r.label, amount: fmtAmount(r.amount, a.decimals), stealth: r.stealth })) };
+    m.step = 3;
+  } catch (e) { toast(niceError(e)); }
+  finally { m.busy = false; render(); }
+}
+function downloadFile(name, text, type = 'text/csv') {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = Object.assign(document.createElement('a'), { href: url, download: name });
+  document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+function bindMany() {
+  const t = $('#pr-text'); if (!t) return;
+  t.addEventListener('input', () => { S.many.text = t.value; if (S.many.rows.length) { S.many.rows = []; render(); $('#pr-text').focus(); } });
+  const f = $('#pr-file');
+  f.addEventListener('change', async () => { const file = f.files[0]; if (!file) return; S.many.text = (await file.text()).slice(0, 20000); S.many.rows = []; render(); });
+  updateBalance();
 }
 
 function viewInbox() {
@@ -491,7 +645,7 @@ function inboxRow(it) {
     ${assetIcon(tok)}
     <div><div class="amt">${shown} <span style="color:var(--muted);font-weight:500">${esc(sym)}</span></div>
     <div class="sub">${timeAgo(it.t)} · <a href="${addrUrl(it.addr)}" target="_blank" rel="noopener" class="mono">${short(it.addr)}</a>${it.loaded && !has ? ' · withdrawn' : ''}</div></div>
-    ${it.loaded && has ? `<button class="btn small primary" data-act="withdraw" data-addr="${it.addr}">Withdraw</button>` : '<span></span>'}
+    <span class="ib-acts">${it.loaded ? `<button class="btn small" data-act="prove" data-addr="${it.addr}">Prove</button>` : ''}${it.loaded && has ? `<button class="btn small primary" data-act="withdraw" data-addr="${it.addr}">Withdraw</button>` : ''}</span>
   </div>`;
 }
 
@@ -500,7 +654,8 @@ function bindPane() {
   const pane = $('#pane');
   pane.querySelectorAll('[data-act]').forEach((el) => el.addEventListener('click', onAct));
   pane.querySelectorAll('[data-nav]').forEach((el) => el.addEventListener('click', (e) => { e.preventDefault(); go(el.dataset.nav); }));
-  if (S.view === 'send' && !S.send.result) bindSend();
+  if (S.view === 'send' && S.mode === 'many' && CFG.batch) bindMany();
+  else if (S.view === 'send' && !S.send.result) bindSend();
   if (S.view === 'receive' && $('#req-card')) bindRequest();
   if (S.view === 'receive' && $('#nm-input')) bindNames();
   if (S.view === 'inbox' && S.keys) syncInbox();
@@ -517,6 +672,17 @@ async function onAct(e) {
     if (act === 'qr') return toggleQr('#qr', receiveLink());
     if (act === 'register') { btn.disabled = true; btn.textContent = 'Confirm in wallet…'; await register(); return; }
     if (act === 'asset') return openAssetModal();
+    if (act === 'scan') return openScanner();
+    if (act === 'mode') { S.mode = btn.dataset.mode; return render(); }
+    if (act === 'pr-check') return checkMany();
+    if (act === 'pr-send') return sendMany();
+    if (act === 'pr-csv') return $('#pr-file').click();
+    if (act === 'many-again') { S.many = { text: '', rows: [], checking: false, busy: false, step: 0, result: null }; return render(); }
+    if (act === 'many-receipts') {
+      const r = S.many.result;
+      const csv = ['recipient,amount,asset,one_time_address,transaction'].concat(r.rows.map((x) => [x.who, x.amount, r.symbol, x.stealth, r.tx].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))).join('\n');
+      return downloadFile(`cowl-payroll-${r.tx.slice(2, 10)}.csv`, csv);
+    }
     if (act === 'claim-name') { btn.disabled = true; btn.textContent = 'Check your wallet…'; S.nm.busy = true; try { await claimName(); } finally { S.nm.busy = false; } return; }
     if (act === 'release-name') return releaseName();
     if (act === 'copy-name') return copy(receiveLink(), 'Name link copied');
@@ -528,6 +694,13 @@ async function onAct(e) {
     if (act === 'copy-snip') return copy(badgeSnippets()[btn.dataset.k], 'Copied');
     if (act === 'send-again') { S.send = { ...S.send, amount: '', result: null, step: 0 }; return render(); }
     if (act === 'withdraw') return openWithdraw(btn.dataset.addr);
+    if (act === 'prove') return openProve(btn.dataset.addr);
+    if (act === 'verify-go') return verifyProof();
+    if (act === 'send-receipt') {
+      const r = S.send.result;
+      const text = ['COWL payment receipt', '', `Paid: ${r.amount} ${r.symbol}`, `To: ${r.to}`, `One-time address: ${r.stealth}`, `Transaction: ${r.tx}`, `From: ${r.from}`, ...(r.memo ? [`Note: ${r.memo}`] : []), `Time: ${r.at}`, '', `Check on Blockscout: ${txUrl(r.tx)}`].join('\n');
+      return downloadFile(`cowl-receipt-${r.tx.slice(2, 10)}.txt`, text, 'text/plain');
+    }
   } catch (err) {
     toast(niceError(err));
     render();
@@ -691,7 +864,7 @@ async function doSend() {
     }
     toast('Sending privately…');
     await tx.wait();
-    s.result = { tx: tx.hash, stealth: st.stealthAddress, amount: fmtAmount(amount, s.asset.decimals), symbol: s.asset.symbol };
+    s.result = { tx: tx.hash, stealth: st.stealthAddress, amount: fmtAmount(amount, s.asset.decimals), symbol: s.asset.symbol, to: s.to, from: S.account, at: new Date().toISOString(), memo: s.req?.memo || '' };
     s.step = 3;
   } catch (e) {
     toast(niceError(e));
@@ -752,6 +925,108 @@ function updateBadge() {
   const n = [...S.inbox.mine.values()].filter((i) => i.loaded && (i.balance > 0n)).length;
   const b = $('#inbox-badge');
   b.hidden = !n; b.textContent = n;
+}
+
+// ===================================================================== pindai QR (kamera)
+let scanStream = null;
+function stopScan() { scanStream?.getTracks().forEach((t) => t.stop()); scanStream = null; }
+async function openScanner() {
+  modal(`<h3>Scan a COWL QR</h3><p>Point the camera at a COWL link or payment request. The picture never leaves this device.</p>
+    <div class="scan-box"><video id="scan-v" playsinline muted></video><i></i></div><div class="note" id="scan-note">Starting camera…</div>`);
+  const dlg = $('#modal'); dlg.addEventListener('close', stopScan, { once: true });
+  try {
+    scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+  } catch { $('#scan-note').textContent = 'Camera not available. Allow camera access, or paste the link instead.'; return; }
+  const v = $('#scan-v'); v.srcObject = scanStream; await v.play();
+  $('#scan-note').textContent = 'Looking for a QR code…';
+  const c = document.createElement('canvas'), g = c.getContext('2d', { willReadFrequently: true });
+  const tick = () => {
+    if (!scanStream) return;
+    if (v.videoWidth) {
+      c.width = v.videoWidth; c.height = v.videoHeight; g.drawImage(v, 0, 0);
+      const code = jsQR(g.getImageData(0, 0, c.width, c.height).data, c.width, c.height, { inversionAttempts: 'dontInvert' });
+      if (code?.data) return onScanned(code.data.trim());
+    }
+    setTimeout(tick, 180);
+  };
+  tick();
+}
+function onScanned(text) {
+  stopScan(); closeModal();
+  // link cowl.pro (termasuk tagihan dengan jumlah & catatan) → buka langsung supaya semuanya terisi
+  try {
+    const u = new URL(text);
+    if (/(^|\.)cowl\.pro$/i.test(u.hostname) || u.origin === location.origin) { location.assign(location.origin + u.pathname + u.search); return; }
+  } catch {}
+  S.view = 'send'; S.mode = 'one'; S.send.to = text; S.send.meta = null; S.send.resolved = ''; render();
+  toast('QR scanned');
+}
+
+// ===================================================================== bukti pembayaran
+const PROOF_HEAD = 'COWL payment proof';
+function proofMessage(o) {
+  return [PROOF_HEAD, '', `One-time address: ${o.addr}`, `Transaction: ${o.tx}`, ...(o.note ? [`Note: ${o.note}`] : []), `Issued: ${o.issued}`].join('\n');
+}
+function openProve(addr) {
+  const it = S.inbox.mine.get(addr);
+  if (!it) return;
+  modal(`
+    <h3>Prove you received this</h3>
+    <p>Signs a short statement with this payment's one-time key, in this browser. Anyone can check it at cowl.pro/verify. It does not reveal your main wallet and moves nothing.</p>
+    <div class="field"><label for="pf-note">Note (optional)</label><input class="input" id="pf-note" maxlength="80" placeholder="Invoice #12"></div>
+    <button class="btn primary block" id="pf-go">Create proof <span class="arrow">→</span></button>
+    <div id="pf-out" hidden><pre class="meta-text pf-pre" id="pf-text"></pre>
+      <div class="link-actions"><button class="btn small primary" id="pf-copy">Copy</button><button class="btn small" id="pf-dl">Download</button></div></div>`);
+  $('#pf-go').addEventListener('click', async () => {
+    const msg = proofMessage({ addr: ethers.getAddress(it.addr), tx: it.tx, note: $('#pf-note').value.trim().replace(/\n/g, ' '), issued: new Date().toISOString() });
+    const sig = await new ethers.Wallet(it.priv).signMessage(msg); // kunci sekali pakai tidak pernah keluar dari tab
+    const text = msg + '\nSignature: ' + sig;
+    $('#pf-text').textContent = text; $('#pf-out').hidden = false; $('#pf-go').hidden = true;
+    $('#pf-copy').addEventListener('click', () => copy(text, 'Proof copied'));
+    $('#pf-dl').addEventListener('click', () => downloadFile(`cowl-proof-${it.addr.slice(2, 10)}.txt`, text, 'text/plain'));
+  });
+}
+const ANN_TOPIC = '0x5f0eab8057630ba7676c49b4f21a0231414e79474595be8e4c432fbf6bf0f4e7';
+function viewVerify() {
+  return `
+  <div class="card">
+    <span class="kicker">Verify a COWL proof</span>
+    <h1>Check a payment proof.</h1>
+    <p class="lead">Paste a proof made in a COWL Inbox. This page checks the signature and the transaction on Robinhood Chain. Nothing is sent to a server.</p>
+    <div class="field"><label for="vf-text">Proof</label><textarea class="input mono pr-text" id="vf-text" rows="8" spellcheck="false" placeholder="COWL payment proof&#10;&#10;One-time address: 0x…&#10;Transaction: 0x…&#10;Issued: …&#10;Signature: 0x…"></textarea></div>
+    <button class="btn primary block" data-act="verify-go">Verify <span class="arrow">→</span></button>
+    <div id="vf-out"></div>
+  </div>`;
+}
+async function verifyProof() {
+  const out = $('#vf-out'), text = $('#vf-text').value.trim();
+  const show = (ok, rows, title) => { out.innerHTML = `<div class="vf-res ${ok ? 'ok' : 'bad'}"><b>${title}</b>${rows.map(([k, v]) => `<div class="row"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')}</div>`; };
+  try {
+    const m = text.match(/^([\s\S]*?)\nSignature: (0x[0-9a-fA-F]{130})\s*$/);
+    if (!m || !m[1].startsWith(PROOF_HEAD)) throw new Error('This does not look like a COWL proof.');
+    const msg = m[1];
+    const addr = (msg.match(/One-time address: (0x[0-9a-fA-F]{40})/) || [])[1];
+    const txh = (msg.match(/Transaction: (0x[0-9a-fA-F]{64})/) || [])[1];
+    if (!addr || !txh) throw new Error('The proof is missing the address or the transaction.');
+    const signer = ethers.verifyMessage(msg, m[2]);
+    if (signer.toLowerCase() !== addr.toLowerCase()) return show(false, [['Signed by', short(signer, 6)], ['Claims', short(addr, 6)]], 'Not valid: the signature does not match the address.');
+    const rc = await readProvider().getTransactionReceipt(txh);
+    if (!rc) throw new Error('Transaction not found on Robinhood Chain.');
+    const iface = new ethers.Interface(['event Announcement(uint256 indexed schemeId, address indexed stealthAddress, address indexed caller, bytes ephemeralPubKey, bytes metadata)']);
+    const log = rc.logs.find((l) => l.topics[0] === ANN_TOPIC && ethers.getAddress('0x' + l.topics[2].slice(26)) === ethers.getAddress(addr));
+    if (!log) return show(false, [['Transaction', `<a class="mono" href="${txUrl(txh)}" target="_blank" rel="noopener">${short(txh, 6)} ↗</a>`]], 'Not valid: this transaction did not pay that address.');
+    const meta = parseMetadata(iface.parseLog(log).args.metadata) || {};
+    const tok = meta.kind === 'token' ? await tokenInfo(meta.token).catch(() => ({ symbol: 'TOKEN', decimals: 18 })) : ETH;
+    const blk = await readProvider().getBlock(rc.blockNumber);
+    const note = (msg.match(/Note: (.*)/) || [])[1];
+    show(true, [
+      ['Received', meta.amount != null ? `${fmtAmount(meta.amount, tok.decimals)} ${esc(tok.symbol)}` : '—'],
+      ['One-time address', `<a class="mono" href="${addrUrl(addr)}" target="_blank" rel="noopener">${short(addr, 6)} ↗</a>`],
+      ['Transaction', `<a class="mono" href="${txUrl(txh)}" target="_blank" rel="noopener">${short(txh, 6)} ↗</a>`],
+      ['Paid at', blk ? new Date(blk.timestamp * 1000).toISOString().replace('T', ' ').slice(0, 16) + ' UTC' : '—'],
+      ...(note ? [['Note', esc(note)]] : []),
+    ], '✓ Valid. Whoever shared this controls the address that received this payment.');
+  } catch (e) { show(false, [], esc(niceError(e))); }
 }
 
 function openWithdraw(addr) {
@@ -864,5 +1139,7 @@ async function main() {
   addEventListener('popstate', () => { routeFromPath(); render(); });
   render();
   autoReconnect();
+  // bisa dipasang di layar HP (PWA); service worker sengaja tanpa cache
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
 main();

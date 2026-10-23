@@ -97,6 +97,10 @@ export const ABI = {
     'function registerKeys(uint256 schemeId, bytes stealthMetaAddress)',
     'function stealthMetaAddressOf(address registrant, uint256 schemeId) view returns (bytes)',
   ],
+  batch: [
+    'function sendEthBatch((address stealth, bytes ephemeralPubKey, bytes1 viewTag, uint256 amount)[] payments) payable',
+    'function sendTokenBatch(address token, (address stealth, bytes ephemeralPubKey, bytes1 viewTag, uint256 amount)[] payments, uint256 tipEach) payable',
+  ],
   router: [
     'function sendEth(address stealth, bytes ephemeralPubKey, bytes1 viewTag) payable',
     'function sendToken(address token, uint256 amount, address stealth, bytes ephemeralPubKey, bytes1 viewTag) payable',
